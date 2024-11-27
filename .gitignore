@@ -133,3 +133,5 @@ dist
 
 # 去掉私钥
 api_keys.json
+
+*.csv

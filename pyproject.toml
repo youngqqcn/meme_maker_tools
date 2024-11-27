@@ -10,6 +10,8 @@ package-mode = false
 python = "^3.12"
 ccxt = "^4.4.34"
 pandas = "^2.2.3"
+solana = "^0.35.1"
+base58 = "^2.1.1"
 
 
 [build-system]
