@@ -29,7 +29,7 @@ const main = async () => {
     process.env.BUNDLE_TRANSACTION_LIMIT || '0'
   );
 
-  const c = searcherClient(blockEngineUrl, keypair);
+  const c = searcherClient(blockEngineUrl);
 
   const rpcUrl = process.env.RPC_URL || '';
   console.log('RPC_URL:', rpcUrl);
