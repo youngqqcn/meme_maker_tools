@@ -1,0 +1,13 @@
+{
+  "name": "meme_maker_tools",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:youngqqcn/meme_maker_tools.git",
+  "author": "yqq <youngqqcn@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@bloxroute/solana-trader-client-ts": "^2.2.0",
+    "@solana/web3.js": "^1.95.5",
+    "bs58": "^6.0.0"
+  }
+}
