@@ -23,9 +23,9 @@ def gate_withdraw(
     :return: None
     """
     # 获取链信息
-    # params = {'currency': currency}
-    # currencies = exchange.public_wallet_get_currency_chains(params)
-    # print(currencies)
+    params = {'currency': currency}
+    currencies = exchange.public_wallet_get_currency_chains(params)
+    print(currencies)
     # exit()
 
     # 检查资金账户余额
@@ -48,8 +48,8 @@ def gate_withdraw(
             "address": wallet_address,
             "amount": amount,
         }
-        if tag is not None:
-            params["memo"] = tag
+        # if tag is not None:
+            # params["memo"] = tag
         withdrawal = exchange.privateWithdrawalsPostWithdrawals(params)
         print("提现结果：", withdrawal)
     else:
