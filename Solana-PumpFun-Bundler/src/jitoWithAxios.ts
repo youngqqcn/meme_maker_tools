@@ -21,11 +21,12 @@ interface Blockhash {
     lastValidBlockHeight: number;
 }
 
-const solanaConnection = new Connection(RPC_ENDPOINT, {
-    wsEndpoint: RPC_WEBSOCKET_ENDPOINT,
-});
+// const solanaConnection = new Connection(RPC_ENDPOINT, {
+//     wsEndpoint: RPC_WEBSOCKET_ENDPOINT,
+// });
 
 export const jitoWithAxios = async (
+    connection: Connection,
     transactions: VersionedTransaction[],
     payer: Keypair
 ) => {
@@ -49,7 +50,7 @@ export const jitoWithAxios = async (
 
     try {
         console.log(`Calculated fee: ${JITO_FEE / LAMPORTS_PER_SOL} sol`);
-        let latestBlockhash = await solanaConnection.getLatestBlockhash();
+        let latestBlockhash = await connection.getLatestBlockhash();
         const jitTipTxFeeMessage = new TransactionMessage({
             payerKey: payer.publicKey,
             recentBlockhash: latestBlockhash.blockhash,
@@ -78,11 +79,11 @@ export const jitoWithAxios = async (
         }
 
         const endpoints = [
-            // 'https://mainnet.block-engine.jito.wtf/api/v1/bundles',
+            'https://mainnet.block-engine.jito.wtf/api/v1/bundles',
             // 'https://amsterdam.mainnet.block-engine.jito.wtf/api/v1/bundles',
             // 'https://frankfurt.mainnet.block-engine.jito.wtf/api/v1/bundles',
             // 'https://ny.mainnet.block-engine.jito.wtf/api/v1/bundles',
-            "https://tokyo.mainnet.block-engine.jito.wtf/api/v1/bundles",
+            // "https://tokyo.mainnet.block-engine.jito.wtf/api/v1/bundles",
         ];
 
         const requests = endpoints.map((url) =>
@@ -108,7 +109,7 @@ export const jitoWithAxios = async (
             console.log(`Successful response`);
             // console.log(`Confirming jito transaction...`);
 
-            const confirmation = await solanaConnection.confirmTransaction(
+            const confirmation = await connection.confirmTransaction(
                 {
                     signature: jitoTxsignature,
                     lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,

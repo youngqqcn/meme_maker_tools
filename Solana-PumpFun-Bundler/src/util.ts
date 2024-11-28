@@ -14,8 +14,8 @@ import {
 import { PriorityFee, TransactionResult } from "./types";
 import fs from "fs";
 
-export const DEFAULT_COMMITMENT: Commitment = "finalized";
-export const DEFAULT_FINALITY: Finality = "finalized";
+export const DEFAULT_COMMITMENT: Commitment = "confirmed";
+export const DEFAULT_FINALITY: Finality = "confirmed";
 
 export const calculateWithSlippageBuy = (
     amount: bigint,

@@ -48,6 +48,7 @@ import { getUploadedMetadataURI } from "./uploadToIpfs";
 import { jitoWithAxios } from "./jitoWithAxios";
 import { RPC_ENDPOINT, RPC_WEBSOCKET_ENDPOINT } from "./constants";
 import { global_mint } from "./config";
+import { build_send_bundle } from "../src/jito";
 
 const PROGRAM_ID = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
 const MPL_TOKEN_METADATA_PROGRAM_ID =
@@ -77,9 +78,12 @@ export class PumpFunSDK {
         slippageBasisPoints: bigint = 300n,
         priorityFees?: PriorityFee,
         commitment: Commitment = DEFAULT_COMMITMENT,
-        finality: Finality = DEFAULT_FINALITY
+        finality: Finality = DEFAULT_FINALITY,
+        useJitoBundle: boolean = true
     ) {
+        console.log("buyers length ", buyers.length);
         let tokenMetadata = await this.createTokenMetadata(createTokenMetadata);
+        console.log("tokenMetadata: ", tokenMetadata);
 
         let createTx = await this.getCreateInstructions(
             creator.publicKey,
@@ -89,18 +93,18 @@ export class PumpFunSDK {
             mint
         );
 
-        let newTx = new Transaction().add(createTx);
-        // let buyTxs: VersionedTransaction[] = [];
+        let normalBuyTxs = new Transaction().add(createTx);
+        let bundleBuyTxs: VersionedTransaction[] = [];
 
-        // let createVersionedTx = await buildTx(
-        //     this.connection,
-        //     newTx,
-        //     creator.publicKey,
-        //     [creator, mint],
-        //     priorityFees,
-        //     commitment,
-        //     finality
-        // );
+        let createVersionedTx = await buildTx(
+            this.connection,
+            new Transaction().add(createTx),
+            creator.publicKey,
+            [creator, mint],
+            priorityFees,
+            commitment,
+            finality
+        );
 
         if (buyAmountSol > 0) {
             for (let i = 0; i < buyers.length; i++) {
@@ -121,42 +125,51 @@ export class PumpFunSDK {
                     commitment
                 );
                 // 插入买入指令
-                newTx.add(buyTx);
+                normalBuyTxs.add(buyTx);
 
-                // const buyVersionedTx = await buildTx(
-                //   this.connection,
-                //   buyTx,
-                //   buyers[i].publicKey,
-                //   [buyers[i]],
-                //   priorityFees,
-                //   commitment,
-                //   finality
-                // );
-                // buyTxs.push(buyVersionedTx);
+                const buyVersionedTx = await buildTx(
+                    this.connection,
+                    buyTx,
+                    buyers[i].publicKey,
+                    [buyers[i]],
+                    priorityFees,
+                    commitment,
+                    finality
+                );
+                bundleBuyTxs.push(buyVersionedTx);
             }
         }
 
         // FIXME:
-        return await sendTx(
-            this.connection,
-            newTx,
-            creator.publicKey,
-            [creator, mint],
-            priorityFees,
-            commitment,
-            finality
-        );
-        // let result;
+        if (!useJitoBundle) {
+            return await sendTx(
+                this.connection,
+                normalBuyTxs,
+                creator.publicKey,
+                [creator, mint],
+                priorityFees,
+                commitment,
+                finality
+            );
+        } else {
+            // console.log("发送给jito");
+            // let result;
+            // while (1) {
+            //     result = await jitoWithAxios(
+            //         this.connection,
+            //         [createVersionedTx, ...bundleBuyTxs],
+            //         creator
+            //     );
+            //     if (result.confirmed) break;
+            // }
+            let x = await build_send_bundle(
+                this.connection,
 
-        // while (1) {
-        //     result = await jitoWithAxios(
-        //         [createVersionedTx, ...buyTxs],
-        //         creator
-        //     );
-        //     if (result.confirmed) break;
-        // }
-
-        // return result;
+                [createVersionedTx, ...bundleBuyTxs],
+                creator
+            );
+            return x;
+        }
     }
 
     async buy(

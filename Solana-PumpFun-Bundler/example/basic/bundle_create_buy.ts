@@ -6,7 +6,7 @@ import {
     LAMPORTS_PER_SOL,
     PublicKey,
 } from "@solana/web3.js";
-import { buildTx, DEFAULT_DECIMALS, PumpFunSDK } from "../../src";
+import { DEFAULT_DECIMALS, PumpFunSDK } from "../../src";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import {
@@ -19,7 +19,6 @@ import metadata from "../../src/metadata";
 import { getUploadedMetadataURI } from "../../src/uploadToIpfs";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import base58 from "bs58";
-import { bundle } from "../../src/jito";
 
 const KEYS_FOLDER = __dirname + "/.keys";
 const SLIPPAGE_BASIS_POINTS = 100n;
@@ -63,8 +62,10 @@ const main = async () => {
 
     let wallet = new NodeWallet(new Keypair()); //note this is not used
     const provider = new AnchorProvider(connection, wallet, {
-        commitment: "finalized",
+        commitment: "confirmed",
     });
+
+    await createKeypair();
 
     //   const testAccount = getOrCreateKeypair(KEYS_FOLDER, "test-account");
     //   const buyer = getOrCreateKeypair(KEYS_FOLDER, "buyer");
@@ -72,6 +73,7 @@ const main = async () => {
         base58.decode(process.env.PPPP ?? "")
     );
     const mint = getOrCreateKeypair(KEYS_FOLDER, "mint");
+    console.log("mint: ", mint.publicKey.toBase58());
 
     await printSOLBalance(
         connection,
@@ -95,69 +97,61 @@ const main = async () => {
 
     //Check if mint already exists
     let boundingCurveAccount = await sdk.getBondingCurveAccount(mint.publicKey);
+    if (!boundingCurveAccount) {
+        let tokenMetadata = {
+            name: metadata.name,
+            symbol: metadata.symbol,
+            description: metadata.description,
+            showName: metadata.showName,
+            createOn: metadata.createdOn,
+            twitter: metadata.twitter,
+            telegram: metadata.telegram,
+            website: metadata.website,
+            file: await openAsBlob("./upload/CHOCO.png"),
+        };
 
-    // Buy and sell
-    if (boundingCurveAccount) {
-        // sell all tokens
-        let currentSPLBalance = await getSPLBalance(
-            connection,
-            mint.publicKey,
-            testAccount.publicKey
-        );
-        console.log("currentSPLBalance ", currentSPLBalance);
-        if (currentSPLBalance) {
-            let sellIxs = await sdk.getSellInstructionsByTokenAmount(
-                testAccount.publicKey,
-                mint.publicKey,
-                BigInt(
-                    Math.floor(
-                        currentSPLBalance * Math.pow(10, DEFAULT_DECIMALS)
-                    )
-                ),
-                SLIPPAGE_BASIS_POINTS
-            );
-
-            let tx= await buildTx(connection, sellIxs, testAccount.publicKey, [testAccount])
-            let sellResults  = await bundle([tx], testAccount)
-
-
-            // let sellResults = await sdk.sell(
-            //     testAccount,
-            //     mint.publicKey,
-            //     BigInt(
-            //         Math.floor(
-            //             currentSPLBalance * Math.pow(10, DEFAULT_DECIMALS)
-            //         )
-            //     ), // 全部卖完
-            //     SLIPPAGE_BASIS_POINTS,
-            //     {
-            //         unitLimit: 5_000_000,
-            //         unitPrice: 200_000,
-            //     }
-            // );
-            if (sellResults) {
-                await printSOLBalance(
-                    connection,
-                    testAccount.publicKey,
-                    "Test Account keypair"
-                );
-
-                printSPLBalance(
-                    connection,
-                    mint.publicKey,
-                    testAccount.publicKey,
-                    "After SPL sell all"
-                );
-                console.log(
-                    "Bonding curve after sell",
-                    await sdk.getBondingCurveAccount(mint.publicKey)
-                );
-            } else {
-                console.log("Sell failed");
+        let createResults = await sdk.createAndBuy(
+            testAccount,
+            mint,
+            [
+                // testAccount,
+                Keypair.fromSecretKey(base58.decode(process.env.BUY1 ?? "")),
+                Keypair.fromSecretKey(base58.decode(process.env.BUY2 ?? "")),
+                // Keypair.fromSecretKey(base58.decode(process.env.BUY3 ?? "")),
+            ], // buyers
+            tokenMetadata,
+            BigInt(0.01 * LAMPORTS_PER_SOL),
+            SLIPPAGE_BASIS_POINTS,
+            {
+                unitLimit: 5_000_000,
+                unitPrice: 200_000,
             }
+        );
+
+        if (createResults) {
+            console.log(
+                "Success:",
+                `https://pump.fun/${mint.publicKey.toBase58()}`
+            );
+            // console.log(createResults.signature?.toString());
+            // boundingCurveAccount = await sdk.getBondingCurveAccount(
+            //     mint.publicKey
+            // );
+            // console.log(
+            //     "Bonding curve after create and buy",
+            //     boundingCurveAccount
+            // );
+            // printSPLBalance(connection, mint.publicKey, testAccount.publicKey);
+        } else {
+            console.log("createResults: ", createResults);
         }
     } else {
-        console.log("获取boundingCurveAccount失败");
+        console.log("boundingCurveAccount", boundingCurveAccount);
+        console.log(
+            "Success:",
+            `https://pump.fun/${mint.publicKey.toBase58()}`
+        );
+        printSPLBalance(connection, mint.publicKey, testAccount.publicKey);
     }
 };
 
