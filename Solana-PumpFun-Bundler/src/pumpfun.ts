@@ -78,8 +78,7 @@ export class PumpFunSDK {
         slippageBasisPoints: bigint = 300n,
         priorityFees?: PriorityFee,
         commitment: Commitment = DEFAULT_COMMITMENT,
-        finality: Finality = DEFAULT_FINALITY,
-        useJitoBundle: boolean = true
+        finality: Finality = DEFAULT_FINALITY
     ) {
         console.log("buyers length ", buyers.length);
         let tokenMetadata = await this.createTokenMetadata(createTokenMetadata);
@@ -93,7 +92,6 @@ export class PumpFunSDK {
             mint
         );
 
-        let normalBuyTxs = new Transaction().add(createTx);
         let bundleBuyTxs: VersionedTransaction[] = [];
 
         let createVersionedTx = await buildTx(
@@ -124,8 +122,6 @@ export class PumpFunSDK {
                     slippageBasisPoints,
                     commitment
                 );
-                // 插入买入指令
-                normalBuyTxs.add(buyTx);
 
                 const buyVersionedTx = await buildTx(
                     this.connection,
@@ -140,36 +136,23 @@ export class PumpFunSDK {
             }
         }
 
-        // FIXME:
-        if (!useJitoBundle) {
-            return await sendTx(
-                this.connection,
-                normalBuyTxs,
-                creator.publicKey,
-                [creator, mint],
-                priorityFees,
-                commitment,
-                finality
-            );
-        } else {
-            // console.log("发送给jito");
-            // let result;
-            // while (1) {
-            //     result = await jitoWithAxios(
-            //         this.connection,
-            //         [createVersionedTx, ...bundleBuyTxs],
-            //         creator
-            //     );
-            //     if (result.confirmed) break;
-            // }
-            let x = await build_send_bundle(
-                this.connection,
+        // console.log("发送给jito");
+        // let result;
+        // while (1) {
+        //     result = await jitoWithAxios(
+        //         this.connection,
+        //         [createVersionedTx, ...bundleBuyTxs],
+        //         creator
+        //     );
+        //     if (result.confirmed) break;
+        // }
+        let x = await build_send_bundle(
+            this.connection,
 
-                [createVersionedTx, ...bundleBuyTxs],
-                creator
-            );
-            return x;
-        }
+            [createVersionedTx, ...bundleBuyTxs],
+            creator
+        );
+        return x;
     }
 
     async buy(
@@ -280,6 +263,7 @@ export class PumpFunSDK {
             commitment
         );
         if (!bondingCurveAccount) {
+            console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxfuck");
             throw new Error(
                 `Bonding curve account not found: ${mint.toBase58()}`
             );

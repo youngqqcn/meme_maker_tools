@@ -19,6 +19,8 @@ import metadata from "../../src/metadata";
 import { getUploadedMetadataURI } from "../../src/uploadToIpfs";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import base58 from "bs58";
+import { searcherClient } from "jito-ts/dist/sdk/block-engine/searcher";
+import { BLOCKENGINE_URL } from "../../src/constants";
 
 const KEYS_FOLDER = __dirname + "/.keys";
 const SLIPPAGE_BASIS_POINTS = 100n;
@@ -109,6 +111,17 @@ const main = async () => {
             website: metadata.website,
             file: await openAsBlob("./upload/CHOCO.png"),
         };
+
+        let isLeaderSlot = false;
+        while (!isLeaderSlot) {
+            let c = searcherClient(BLOCKENGINE_URL);
+            const next_leader = await c.getNextScheduledLeader();
+            const num_slots =
+                next_leader.nextLeaderSlot - next_leader.currentSlot;
+            isLeaderSlot = num_slots <= 2;
+            console.log(`next jito leader slot in ${num_slots} slots`);
+            await new Promise((r) => setTimeout(r, 500));
+        }
 
         let createResults = await sdk.createAndBuy(
             testAccount,

@@ -60,7 +60,8 @@ export async function build_send_bundle(
         throw maybeBundle;
     }
     try {
-        await search.sendBundle(maybeBundle);
+        let bundleId = await search.sendBundle(maybeBundle);
+        console.log("bundleId: ", bundleId)
     } catch (e) {
         console.log(e);
     }

@@ -19,7 +19,7 @@ import metadata from "../../src/metadata";
 import { getUploadedMetadataURI } from "../../src/uploadToIpfs";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import base58 from "bs58";
-import { bundle } from "../../src/jito";
+// import { bundle } from "../../src/jito";
 
 const KEYS_FOLDER = __dirname + "/.keys";
 const SLIPPAGE_BASIS_POINTS = 100n;
@@ -106,35 +106,36 @@ const main = async () => {
         );
         console.log("currentSPLBalance ", currentSPLBalance);
         if (currentSPLBalance) {
-            let sellIxs = await sdk.getSellInstructionsByTokenAmount(
-                testAccount.publicKey,
-                mint.publicKey,
-                BigInt(
-                    Math.floor(
-                        currentSPLBalance * Math.pow(10, DEFAULT_DECIMALS)
-                    )
-                ),
-                SLIPPAGE_BASIS_POINTS
-            );
-
-            let tx= await buildTx(connection, sellIxs, testAccount.publicKey, [testAccount])
-            let sellResults  = await bundle([tx], testAccount)
-
-
-            // let sellResults = await sdk.sell(
-            //     testAccount,
+            // let sellIxs = await sdk.getSellInstructionsByTokenAmount(
+            //     testAccount.publicKey,
             //     mint.publicKey,
             //     BigInt(
             //         Math.floor(
             //             currentSPLBalance * Math.pow(10, DEFAULT_DECIMALS)
             //         )
-            //     ), // 全部卖完
-            //     SLIPPAGE_BASIS_POINTS,
-            //     {
-            //         unitLimit: 5_000_000,
-            //         unitPrice: 200_000,
-            //     }
+            //     ),
+            //     SLIPPAGE_BASIS_POINTS
             // );
+
+            // let tx = await buildTx(connection, sellIxs, testAccount.publicKey, [
+            //     testAccount,
+            // ]);
+            // let sellResults = await bundle([tx], testAccount);
+
+            let sellResults = await sdk.sell(
+                testAccount,
+                mint.publicKey,
+                BigInt(
+                    Math.floor(
+                        currentSPLBalance * Math.pow(10, DEFAULT_DECIMALS)
+                    )
+                ), // 全部卖完
+                SLIPPAGE_BASIS_POINTS,
+                {
+                    unitLimit: 5_000_000,
+                    unitPrice: 200_000,
+                }
+            );
             if (sellResults) {
                 await printSOLBalance(
                     connection,
