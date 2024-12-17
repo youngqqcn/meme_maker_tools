@@ -1,3 +1,7 @@
+/**
+ * SOL 多对一转账
+ */
+
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import {
     Connection,
