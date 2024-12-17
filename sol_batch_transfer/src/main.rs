@@ -2,7 +2,13 @@ mod util;
 use dotenv::dotenv;
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::{
-    commitment_config::CommitmentConfig, compute_budget::ComputeBudgetInstruction, instruction::Instruction, signature::{Keypair, Signer}, system_instruction, transaction::Transaction
+    commitment_config::CommitmentConfig,
+    compute_budget::ComputeBudgetInstruction,
+    instruction::Instruction,
+    native_token::LAMPORTS_PER_SOL,
+    signature::{Keypair, Signer},
+    system_instruction,
+    transaction::Transaction,
 };
 use spl_associated_token_account::{create_associated_token_account, get_associated_token_address};
 use spl_token;
@@ -42,7 +48,7 @@ fn main() {
     for chunk in records.chunks(4) {
         let mut ins: Vec<Instruction> = vec![];
         ins.push(
-            ComputeBudgetInstruction::set_compute_unit_price(1000000) // 10 lamports
+            ComputeBudgetInstruction::set_compute_unit_price(100000), // 10 lamports
         );
 
         for record in chunk {
@@ -50,34 +56,40 @@ fn main() {
             // record.address
             // record.amount
 
+            let amount: u64 = (record.amount.parse::<f64>().unwrap() * 1_000_000_000.0) as u64;
             let receiver_pub = util::get_pub(&record.address);
+            ins.push(system_instruction::transfer(
+                &key_pair.pubkey(),
+                &receiver_pub,
+                amount,
+            ));
 
-            let ata = get_associated_token_address(&receiver_pub, &token_mint_pub);
-            let create_ata_ins =
-                create_associated_token_account(&wallet_publickey, &receiver_pub, &token_mint_pub);
-            // creat if associated token account does not exist
-            if rpc_client
-                .get_account_with_commitment(&ata, CommitmentConfig::confirmed())
-                .unwrap()
-                .value
-                .is_none()
-            {
-                ins.push(create_ata_ins);
-            }
-            ins.push(
-                spl_token::instruction::transfer(
-                    &spl_token::id(),
-                    &ata_sender,
-                    &ata,
-                    &wallet_publickey,
-                    &[],
-                    spl_token::ui_amount_to_amount(
-                        record.amount.parse::<f64>().unwrap(),
-                        env::var("TOKEN_DECIMAL").unwrap().parse::<u8>().unwrap(),
-                    ), // convert to raw amount according to the token decimal
-                )
-                .unwrap(),
-            );
+            // let ata = get_associated_token_address(&receiver_pub, &token_mint_pub);
+            // let create_ata_ins =
+            //     create_associated_token_account(&wallet_publickey, &receiver_pub, &token_mint_pub);
+            // // creat if associated token account does not exist
+            // if rpc_client
+            //     .get_account_with_commitment(&ata, CommitmentConfig::confirmed())
+            //     .unwrap()
+            //     .value
+            //     .is_none()
+            // {
+            //     ins.push(create_ata_ins);
+            // }
+            // ins.push(
+            //     spl_token::instruction::transfer(
+            //         &spl_token::id(),
+            //         &ata_sender,
+            //         &ata,
+            //         &wallet_publickey,
+            //         &[],
+            //         spl_token::ui_amount_to_amount(
+            //             record.amount.parse::<f64>().unwrap(),
+            //             env::var("TOKEN_DECIMAL").unwrap().parse::<u8>().unwrap(),
+            //         ), // convert to raw amount according to the token decimal
+            //     )
+            //     .unwrap(),
+            // );
         }
         let mut tx = Transaction::new_with_payer(&ins, fee_payer);
         tx.sign(&signers, recent);
