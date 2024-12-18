@@ -1,4 +1,4 @@
-import { AccountLayout } from "@solana/spl-token";
+import { AccountLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 import Papa from "papaparse";
 import fs from "fs";
@@ -14,11 +14,10 @@ import {
 export async function getTokenBalance(
     connection: Connection,
     owner: PublicKey,
-    mint: PublicKey,
-    programId: PublicKey
+    mint: PublicKey
 ): Promise<bigint> {
     const tokenAccounts = await connection.getTokenAccountsByOwner(owner, {
-        programId: programId,
+        programId: TOKEN_PROGRAM_ID,
         mint: mint,
     });
     if (!tokenAccounts) {
@@ -37,8 +36,27 @@ export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export function parseCsvFile<T>(filePath: string): Promise<T[]> {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, "utf-8", (err, data) => {
+            if (err) {
+                reject(err);
+                return;
+            }
 
+            const result = Papa.parse<T>(data, {
+                header: true, // 使用第一行作为键名
+                skipEmptyLines: true, // 跳过空行
+            });
 
+            if (result.errors.length > 0) {
+                reject(result.errors);
+            } else {
+                resolve(result.data);
+            }
+        });
+    });
+}
 
 export const getRandomElement = <T>(list: T[]): T | undefined => {
     if (list.length === 0) return undefined; // 如果数组为空，返回 undefined

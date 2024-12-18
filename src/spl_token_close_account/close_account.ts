@@ -1,6 +1,6 @@
 // 创建 raydium池子
 // import { TOKEN_PROGRAM_ID } from "@raydium-io/raydium-sdk";
-import { getTokenBalance, sleep } from "./utils";
+import { getTokenBalance, parseCsvFile, sleep } from "../utils";
 import * as web3 from "@solana/web3.js";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
@@ -12,12 +12,15 @@ import {
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 const log = console.log;
 
-let TOKEN_PROGRAM_ID = new PublicKey(
-    "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-);
+// let TOKEN_PROGRAM_ID = new PublicKey(
+//     "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+// );
 
-const RPC_ENDPOINT_MAIN =
-    "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+interface CsvRecord {
+    fromkey: string;
+    payer: string; // payer作为SOL接收方
+    mint: string;
+}
 
 export async function closeTokenAccount(
     connection: Connection,
@@ -30,12 +33,7 @@ export async function closeTokenAccount(
 
     let amount = null;
     try {
-        amount = await getTokenBalance(
-            connection,
-            owner.publicKey,
-            mint,
-            TOKEN_PROGRAM_ID
-        );
+        amount = await getTokenBalance(connection, owner.publicKey, mint);
     } finally {
         if (!amount) {
             console.log(
@@ -87,19 +85,28 @@ export async function closeTokenAccount(
 }
 
 (async () => {
-    const connection = new Connection(RPC_ENDPOINT_MAIN, {
+    const RPC_ENDPOINT_MAIN =
+        "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+
+    const RPC_ENDPOINT_DEV =
+        "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+
+    const connection = new Connection(RPC_ENDPOINT_DEV, {
         commitment: "confirmed",
         confirmTransactionInitialTimeout: 60000,
     });
 
-    let keys = ["TODO"];
+    let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data.csv");
+    console.log("datas长度", datas.length);
 
-    let payer = Keypair.fromSecretKey(Uint8Array.from(bs58.decode("TODO")));
-
-    let mint = new PublicKey("CGDqKVHToZr9p4YzWmEPZyvYyTzeUEV3yZLuTTWURaEE");
-
-    for (let k of keys) {
-        let owner = web3.Keypair.fromSecretKey(Uint8Array.from(bs58.decode(k)));
+    for (let data of datas) {
+        let owner = web3.Keypair.fromSecretKey(
+            Uint8Array.from(bs58.decode(data.fromkey.trim()))
+        );
+        let mint = new PublicKey(data.mint.trim());
+        let payer = Keypair.fromSecretKey(
+            Uint8Array.from(bs58.decode(data.payer.trim()))
+        );
         await closeTokenAccount(connection, mint, owner, payer);
     }
 })();

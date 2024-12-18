@@ -15,35 +15,13 @@ import {
     LAMPORTS_PER_SOL,
     PublicKey,
 } from "@solana/web3.js";
-import { sol_transfer } from "../utils";
+import { parseCsvFile, sol_transfer } from "../utils";
 
-export interface M2MCsvRecord {
+interface CsvRecord {
     fromkey: string;
     address: string;
     amount: number;
 }
-
-export const parseM2MCsvFile = (filePath: string): Promise<M2MCsvRecord[]> => {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, "utf-8", (err, data) => {
-            if (err) {
-                reject(err);
-                return;
-            }
-
-            const result = Papa.parse<M2MCsvRecord>(data, {
-                header: true, // 使用第一行作为键名
-                skipEmptyLines: true, // 跳过空行
-            });
-
-            if (result.errors.length > 0) {
-                reject(result.errors);
-            } else {
-                resolve(result.data);
-            }
-        });
-    });
-};
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
@@ -57,7 +35,7 @@ export const parseM2MCsvFile = (filePath: string): Promise<M2MCsvRecord[]> => {
         confirmTransactionInitialTimeout: 60000,
     });
 
-    let m2mDatas: M2MCsvRecord[] = await parseM2MCsvFile("./m2m.csv");
+    let m2mDatas: CsvRecord[] = await parseCsvFile<CsvRecord>("./m2m.csv");
     console.log("datas长度", m2mDatas.length);
 
     for (let data of m2mDatas) {
