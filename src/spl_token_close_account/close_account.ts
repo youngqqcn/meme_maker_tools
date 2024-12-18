@@ -1,5 +1,4 @@
 // 创建 raydium池子
-// import { TOKEN_PROGRAM_ID } from "@raydium-io/raydium-sdk";
 import { getTokenBalance, parseCsvFile, sleep } from "../utils";
 import * as web3 from "@solana/web3.js";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
@@ -7,14 +6,9 @@ import {
     createBurnInstruction,
     createCloseAccountInstruction,
     getAssociatedTokenAddressSync,
-    NATIVE_MINT,
 } from "@solana/spl-token";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 const log = console.log;
-
-// let TOKEN_PROGRAM_ID = new PublicKey(
-//     "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-// );
 
 interface CsvRecord {
     fromkey: string;
