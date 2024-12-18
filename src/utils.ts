@@ -37,33 +37,8 @@ export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export interface CsvRecord {
-    address: string;
-    amount: number;
-}
 
-// 解析 CSV 字符串
-export const parseCsvFile = (filePath: string): Promise<CsvRecord[]> => {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, "utf-8", (err, data) => {
-            if (err) {
-                reject(err);
-                return;
-            }
 
-            const result = Papa.parse<CsvRecord>(data, {
-                header: true, // 使用第一行作为键名
-                skipEmptyLines: true, // 跳过空行
-            });
-
-            if (result.errors.length > 0) {
-                reject(result.errors);
-            } else {
-                resolve(result.data);
-            }
-        });
-    });
-};
 
 export const getRandomElement = <T>(list: T[]): T | undefined => {
     if (list.length === 0) return undefined; // 如果数组为空，返回 undefined
