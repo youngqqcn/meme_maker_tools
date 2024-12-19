@@ -24,6 +24,7 @@
         "@types/papaparse": "^5.3.15",
         "axios": "^1.7.7",
         "bs58": "^6.0.0",
+        "jito-ts": "^4.2.0",
         "moment-timezone": "^0.5.46",
         "mysql2": "^3.11.4",
         "papaparse": "^5.4.1",
