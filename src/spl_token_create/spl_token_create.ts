@@ -39,22 +39,22 @@ async function createSplToken(
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
-    let connection = new Connection(RPC_ENDPOINT_DEV);
+    let connection = new Connection(RPC_ENDPOINT_MAIN);
 
     let keypair = Keypair.fromSecretKey(
         bs58.decode(
-            "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
+            "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
         )
     );
     let walletAdapter = new MyWalletAdapter(
-        "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
+        "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
     );
 
     const umi = createUmi(connection);
     const mint = generateSigner(umi);
 
     // 修复 upload
-    const imgBuffer = fs.readFileSync("./src/spl_token_create/bbq.png");
+    const imgBuffer = fs.readFileSync("./src/spl_token_create/ROSE.png");
 
     const pinata = new PinataSDK({
         pinataJwt: NEXT_PUBLIC_PINATA_JWT,
@@ -62,7 +62,7 @@ async function createSplToken(
         pinataGateway: NEXT_PUBLIC_PINATE_GATEWAY,
     });
 
-    const upload = await pinata.upload.file(new File([imgBuffer], "BBQ.png"));
+    const upload = await pinata.upload.file(new File([imgBuffer], "ROSE.png"));
     console.log("upload ", upload)
 
     if (upload.IpfsHash) {
@@ -138,5 +138,5 @@ async function createSplToken(
 }
 
 (async () => {
-    await createSplToken("BBQ", "BBQ", "BBQ is BBQ", 6, 10_0000_0000);
+    await createSplToken("ROSE", "ROSE", "ROSE is a sexy woman.", 6, 10_0000_0000);
 })();

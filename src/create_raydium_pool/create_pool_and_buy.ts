@@ -12,6 +12,7 @@ import { searcherClient } from "jito-ts/dist/sdk/block-engine/searcher";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { buildSwapTransaction } from "./build_swap_tx";
 import { getSlippage, sendAndConfirmTransactionEx } from "../base/utils";
+import { buildCreatePoolTransaction } from "./build_create_pool_tx";
 
 // 只能用主网来测试
 const RPC_URL =
@@ -43,29 +44,27 @@ const main = async () => {
     console.log("RPC_URL:", RPC_URL);
     const conn = new Connection(RPC_URL, "confirmed");
 
-    let tx1 = await buildSwapTransaction(conn, keypair, {
-        poolId: new PublicKey("3cgMjETPtMNgfiL9jeLtbHRqYdfwtTABQ51mSMh8nXRi"),
-        buyToken: "base", // 买入 Token
-        sellToken: "quote",
-        amountSide: "receive",
-        amount: 100,
-        slippage: getSlippage(15),
-    });
-
     // let txSig = await sendAndConfirmTransactionEx(tx1, conn);
     // console.log("txSig", txSig);
-    
+
+    let tx1 = await buildCreatePoolTransaction(conn, keypair, {
+        marketId: new PublicKey("HVtvzpyYjZkccKn31tszPGv1XH36Uq2dLs84pjdYnU6q"),
+        baseMintAmount: 10_0000_0000, // TODO
+        quoteMintAmount: 0.01, // TODO
+    });
+
     let tx2 = await buildSwapTransaction(conn, keypair, {
-        poolId: new PublicKey("3cgMjETPtMNgfiL9jeLtbHRqYdfwtTABQ51mSMh8nXRi"),
-        buyToken: "quote", // 卖出Token
-        sellToken: "base",
+        poolId: new PublicKey("7ADYSXcAagy5LnkiNnb4o4uu1t7vtBtyPsAvvWSQ4Huq"),
+        buyToken: "base", // 买入 Token
+        sellToken: "quote",
         amountSide: "send",
-        amount: 100,
+        amount: 0.1,
         slippage: getSlippage(15),
     });
 
     const result = await sendBundles(c, bundleTransactionLimit, keypair, conn, [
-        tx1,tx2
+        tx1,
+        tx2,
     ]);
     if (!result.ok) {
         console.error("Failed to send bundles:", result.error);

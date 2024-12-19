@@ -60,37 +60,9 @@ export const sendBundles = async (
 
         const bundles = [b];
 
-        // let maybeBundle = b.addTransactions(
-        //     buildMemoTransaction(keypair, "jito test 1", blockHash.blockhash),
-        //     buildMemoTransaction(keypair, "jito test 2", blockHash.blockhash)
-        // );
-
-        // if (!tx1 || !tx2) {
-        //     return {
-        //         ok: false,
-        //         error: new SearcherClientError(3, "666创建交易失败", "xx"),
-        //     };
-        // }
-
         console.log("========$$$$$$$$===========$$$$$$$$$===========");
-        // if (true) {
-        //     return {
-        //         ok: false,
-        //         error: new SearcherClientError(
-        //             3, // INVALID_ARGUMENT
-        //             "Failed to add transactions to bundle",
-        //             "xx"
-        //         ),
-        //     };
-        // }
 
-        // let maybeBundle = b.addTipTx(
-        //     keypair,
-        //     100_000,
-        //     tipAccount,
-        //     blockHash.blockhash
-        // );
-
+        // 小费交易 必须在第一个， 否则失败
         let maybeBundle = b.addTipTx(
             keypair,
             100_000,

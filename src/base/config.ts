@@ -20,7 +20,7 @@ export const addLookupTableInfo = LOOKUP_TABLE_CACHE; // only mainnet. other = u
 export const makeTxVersion = TxVersion.V0; // LEGACY
 
 // 18 lamports 每个单元
-export const COMPUTE_UNIT_PRICE = 3_000_000; // default: 200_000
+export const COMPUTE_UNIT_PRICE = 1_000_000; // default: 200_000
 // export const feeLevel = 18;
 
 config();
