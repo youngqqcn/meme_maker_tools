@@ -145,10 +145,9 @@ export async function swap(
         buyToken: "base", // 买入 Token
         sellToken: "quote",
         amountSide: "receive",
-        amount: 10000 ,
+        amount: 10000,
         slippage: getSlippage(15),
-        // url:
     });
 
-    console.log("ret", ret)
+    console.log("ret", ret);
 })();
