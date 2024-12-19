@@ -39,8 +39,7 @@ import {
 
 const log = console.log;
 
-// const COMPUTE_UNIT_PRICE = 10000
-export const COMPUTE_UNIT_PRICE = 18_000_000; // default: 200_000
+export const COMPUTE_UNIT_PRICE = 1_000_000; // default: 200_000
 
 // type MPLTransferInput = {
 //     mint: web3.PublicKey | string;

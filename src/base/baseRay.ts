@@ -996,16 +996,27 @@ export class BaseRay {
         const baseLotSize = new BN(
             Math.round(10 ** baseMintDecimals * tickers.lotSize)
         );
-        console.log("baseLotSize =====", baseLotSize.toString());
         const quoteLotSize = new BN(
             Math.round(
                 tickers.lotSize * 10 ** quoteMintDecimals * tickers.tickSize
             )
         );
+
+        // https://github.com/sayantank/serum-explorer/blob/444659b4920fba4ce16d3bdd2649e593f04ffe5f/pages/market/create/advanced.tsx#L75
+        // const baseLotSize = Math.round(
+        //     10 ** baseMintDecimals * Math.pow(10, -1 * tickers.lotSize)
+        // );
+        console.log("baseLotSize =====", baseLotSize.toString());
+        // const quoteLotSize = Math.round(
+        //     10 ** quoteMintDecimals *
+        //         Math.pow(10, -1 * tickers.lotSize) *
+        //         Math.pow(10, -1 * tickers.tickSize)
+        // );
         console.log("quoteLotSize =======", quoteLotSize.toString());
-        // if (baseLotSize.eq(ZERO)) return { Err: "lot size is too small" };
-        // if (quoteLotSize.eq(ZERO))
-        // return { Err: "tick size or lot size is too small" };
+
+        if (baseLotSize == 0) return { Err: "lot size is too small" };
+        if (quoteLotSize == 0)
+            return { Err: "tick size or lot size is too small" };
 
         // create market account
         const marketInstructions: web3.TransactionInstruction[] = [];

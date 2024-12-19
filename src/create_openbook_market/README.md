@@ -6,6 +6,7 @@
 
 
 简单点， 两个参数的小数点位数之和不能大于6, 必须小于等于6, 大于0
+> 直接参考: https://docs.raydium.io/raydium/updates/archive/creating-an-openbook-amm-pool#how-to-create-a-permissionless-pool
 
 例如， 如果 order size 设置为 1 (小数点为数0), 那么 price tick size 应该设置为 0.000001 (小数点为数为6)
 例如， 如果 order size 设置为 0.1 (小数点为数1), 那么 price tick size 应该设置为 0.00001 (小数点为数为5)
@@ -15,7 +16,6 @@
 
 - https://github.com/sayantank/serum-explorer/blob/444659b4920fba4ce16d3bdd2649e593f04ffe5f/pages/market/create/advanced.tsx#L75
 ```js
- // tickSize and lotSize here are the 1e^(-x) values, so no check for ><= 0
 const baseLotSize = Math.round(
 10 ** baseMint.decimals * Math.pow(10, -1 * data.lotSize)
 );
@@ -50,3 +50,8 @@ const quoteLotSize = Math.round(
 https://slerf.tools/zh-cn/openbook-market/solana
 
 
+
+-------------
+
+pump.fun 的迁移，是将3笔交易进行捆绑
+![alt text](../../imgs/pump_migrate.png)

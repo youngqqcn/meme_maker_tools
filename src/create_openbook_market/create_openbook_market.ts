@@ -18,7 +18,6 @@ export type CreateMarketInput = {
     quoteMint: PublicKey;
     orderSize: number;
     priceTick: number;
-    url: "mainnet" | "devnet";
 };
 
 export type Result<T, E = any> = {
@@ -31,7 +30,7 @@ export async function createMarket(
     payer: Keypair,
     input: CreateMarketInput
 ): Promise<Result<{ marketId: string; txSignature: string }, string>> {
-    const { baseMint, orderSize, priceTick, quoteMint, url } = input;
+    const { baseMint, orderSize, priceTick, quoteMint } = input;
 
     console.log("payer: " + payer.publicKey.toBase58());
     console.log("===================");
@@ -68,6 +67,9 @@ export async function createMarket(
     }
     if (!preTxInfo.Ok) return { Err: "failed to prepare tx" };
     const { marketId } = preTxInfo.Ok;
+
+    // 这里不能合成一笔交易，会报错 Error: Transaction too large: 1541 > 1232
+    // pump.fun和Raydium官方的做法也是分成了2笔交易来处理
     try {
         // const payer = keypair.publicKey;
         const info = preTxInfo.Ok;
@@ -144,13 +146,18 @@ export async function createMarket(
 }
 
 (async () => {
-    const RPC_ENDPOINT_MAIN =
-        "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+    let rpc_url = "";
+    let network = "devnet";
+    if (network == "devnet") {
+        rpc_url =
+            "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+    } else {
+        rpc_url =
+            "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+        network = "mainnet";
+    }
 
-    const RPC_ENDPOINT_DEV =
-        "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
-
-    const connection = new Connection(RPC_ENDPOINT_DEV, {
+    const connection = new Connection(rpc_url, {
         commitment: "confirmed",
         confirmTransactionInitialTimeout: 60000,
     });
@@ -165,9 +172,8 @@ export async function createMarket(
     let ret = await createMarket(connection, payer, {
         baseMint: new PublicKey(mint),
         quoteMint: DEFAULT_TOKEN.WSOL.mint,
-        orderSize: 0.01, // 对应baseLotSize 10000000， 与pump.fun保持一致
-        priceTick: 0.01, // 对应quoteLotSize 100, 与pump.fun保持一致
-        url: "devnet",
+        orderSize: 1,
+        priceTick: 0.000001,
     });
     console.log("ret", ret);
 })();
