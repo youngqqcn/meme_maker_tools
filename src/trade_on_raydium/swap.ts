@@ -6,7 +6,7 @@ import {
     getKeypairFromEnv,
     getSlippage,
     getTokenBalance,
-    sendAndConfirmTransaction,
+    sendAndConfirmTransactionEx,
     sleep,
 } from "../base/utils";
 import {
@@ -101,7 +101,7 @@ export async function swap(
     }).compileToV0Message();
     const tx = new web3.VersionedTransaction(txMsg);
     tx.sign([payer, ...txInfo.signers]);
-    const txSignature = await sendAndConfirmTransaction(tx, connection).catch(
+    const txSignature = await sendAndConfirmTransactionEx(tx, connection).catch(
         (sendAndConfirmTransactionError: any) => {
             log({ sendAndConfirmTransactionError });
             return null;

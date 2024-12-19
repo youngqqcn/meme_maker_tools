@@ -5,11 +5,13 @@
 require("dotenv").config();
 
 import * as Fs from "fs";
-import { Keypair, Connection } from "@solana/web3.js";
+import { Keypair, Connection, PublicKey } from "@solana/web3.js";
 
 import { onBundleResult, sendBundles } from "./utils";
 import { searcherClient } from "jito-ts/dist/sdk/block-engine/searcher";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { buildSwapTransaction } from "./build_swap_tx";
+import { getSlippage, sendAndConfirmTransactionEx } from "../base/utils";
 
 // 只能用主网来测试
 const RPC_URL =
@@ -41,7 +43,30 @@ const main = async () => {
     console.log("RPC_URL:", RPC_URL);
     const conn = new Connection(RPC_URL, "confirmed");
 
-    const result = await sendBundles(c, bundleTransactionLimit, keypair, conn);
+    let tx1 = await buildSwapTransaction(conn, keypair, {
+        poolId: new PublicKey("3cgMjETPtMNgfiL9jeLtbHRqYdfwtTABQ51mSMh8nXRi"),
+        buyToken: "base", // 买入 Token
+        sellToken: "quote",
+        amountSide: "receive",
+        amount: 100,
+        slippage: getSlippage(15),
+    });
+
+    // let txSig = await sendAndConfirmTransactionEx(tx1, conn);
+    // console.log("txSig", txSig);
+    
+    let tx2 = await buildSwapTransaction(conn, keypair, {
+        poolId: new PublicKey("3cgMjETPtMNgfiL9jeLtbHRqYdfwtTABQ51mSMh8nXRi"),
+        buyToken: "quote", // 卖出Token
+        sellToken: "base",
+        amountSide: "send",
+        amount: 100,
+        slippage: getSlippage(15),
+    });
+
+    const result = await sendBundles(c, bundleTransactionLimit, keypair, conn, [
+        tx1,tx2
+    ]);
     if (!result.ok) {
         console.error("Failed to send bundles:", result.error);
         return;

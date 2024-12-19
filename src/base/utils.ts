@@ -83,7 +83,7 @@ export async function createLookupTable(
     }
 }
 
-export async function sendAndConfirmTransaction(
+export async function sendAndConfirmTransactionEx(
     tx: web3.VersionedTransaction | web3.Transaction,
     connection: web3.Connection
 ) {
