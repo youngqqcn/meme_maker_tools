@@ -784,6 +784,7 @@ export class BaseRay {
                 8
             )
         );
+        console.log("baseAmount: ", Number(baseAmount));
         const quoteAmount = new BN(
             toBufferBE(
                 BigInt(
@@ -795,6 +796,7 @@ export class BaseRay {
                 8
             )
         );
+        console.log("quoteAmount: ", Number(quoteAmount));
         // const quoteAmount = new BN(calcNonDecimalValue(input.quoteMintAmount, quoteMintState.decimals))
 
         const poolInfo = Liquidity.getAssociatedPoolKeys({
@@ -1182,6 +1184,15 @@ export class BaseRay {
             toBufferBE(AccountLayout.decode(quoteVAccountInfo.data).amount, 8)
         ).addn(etc?.extraQuoteReserve ?? 0);
         let fixedSide: SwapSide;
+
+        console.log("lpMint = ", poolKeys.lpMint.toBase58());
+        console.log("lpSupply = ", Number(lpSupply));
+        console.log("baseMint = ", poolKeys.baseMint.toBase58());
+        console.log("baseVault = ", poolKeys.baseVault.toBase58());
+        console.log("baseReserve = ", Number(baseReserve));
+        console.log("quoteMint = ", poolKeys.quoteMint.toBase58());
+        console.log("quoteVault = ", poolKeys.quoteVault.toBase58());
+        console.log("quoteReserve = ", Number(quoteReserve));
 
         const poolInfo: LiquidityPoolInfo = {
             baseDecimals: poolKeys.baseDecimals,

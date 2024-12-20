@@ -13,7 +13,8 @@ import { Connection } from "@solana/web3.js";
 const log = console.log;
 
 type SwapInput = {
-    poolId: PublicKey;
+    // marketId: PublicKey; //
+    poolId: PublicKey ; // 创建池子+购买捆绑， 此时poolId还是没有的
     buyToken: "base" | "quote";
     sellToken?: "base" | "quote";
     amountSide: "send" | "receive";
@@ -23,6 +24,7 @@ type SwapInput = {
 };
 
 export async function buildSwapTransaction(
+    baseRay: BaseRay,
     connection: Connection,
     payer: Keypair,
     input: SwapInput
@@ -35,7 +37,7 @@ export async function buildSwapTransaction(
         }
     }
 
-    const baseRay = new BaseRay({ rpcEndpointUrl: connection.rpcEndpoint });
+    // const baseRay = new BaseRay({ rpcEndpointUrl: connection.rpcEndpoint });
     const slippage = input.slippage;
     const poolKeys = await baseRay
         .getPoolKeys(input.poolId)

@@ -152,9 +152,9 @@ export async function createPool(
     );
 
     let ret = await createPool(connection, payer, {
-        marketId: new PublicKey("EYrp4kCnm7BMEza4ydbUKSpFuooBKv8Rmz4p9uCo2e4t"),
-        baseMintAmount: 1_0000_0000, // TODO
-        quoteMintAmount: 10, // TODO
+        marketId: new PublicKey("5uQDh6GRpaYYEboa6CDBD11gGhsgW5UJVd7auGV479hX"),
+        baseMintAmount: 10_0000_0000, // TODO
+        quoteMintAmount: 1, // TODO
     });
 
     console.log("ret", ret);

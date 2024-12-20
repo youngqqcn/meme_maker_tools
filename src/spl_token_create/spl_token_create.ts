@@ -39,15 +39,17 @@ async function createSplToken(
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
-    let connection = new Connection(RPC_ENDPOINT_MAIN);
+    let connection = new Connection(RPC_ENDPOINT_DEV);
 
     let keypair = Keypair.fromSecretKey(
         bs58.decode(
-            "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
+            // "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
+            "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
         )
     );
     let walletAdapter = new MyWalletAdapter(
-        "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
+        // "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
+        "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
     );
 
     const umi = createUmi(connection);
@@ -63,7 +65,7 @@ async function createSplToken(
     });
 
     const upload = await pinata.upload.file(new File([imgBuffer], "ROSE.png"));
-    console.log("upload ", upload)
+    console.log("upload ", upload);
 
     if (upload.IpfsHash) {
         imageUri =
@@ -138,5 +140,11 @@ async function createSplToken(
 }
 
 (async () => {
-    await createSplToken("ROSE", "ROSE", "ROSE is a sexy woman.", 6, 10_0000_0000);
+    await createSplToken(
+        "ROSE1220",
+        "ROSE1220",
+        "ROSE is a sexy woman.",
+        6,
+        10_0000_0000
+    );
 })();

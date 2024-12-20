@@ -34,15 +34,16 @@ export type CreatePoolInput = {
 };
 
 export async function buildCreatePoolTransaction(
+    baseRay: BaseRay,
     connection: Connection,
     payer: Keypair,
     input: CreatePoolInput
-): Promise<VersionedTransaction> {
+) {
     let { baseMintAmount, quoteMintAmount, marketId } = input;
     // let wallet = new CustomWallet();
     console.log("payer: " + payer.publicKey.toBase58());
 
-    const baseRay = new BaseRay({ rpcEndpointUrl: connection.rpcEndpoint });
+    // const baseRay = new BaseRay({ rpcEndpointUrl: connection.rpcEndpoint });
     const marketState = await baseRay
         .getMarketInfo(marketId)
         .catch((getMarketInfoError) => {
@@ -81,5 +82,5 @@ export async function buildCreatePoolTransaction(
     }).compileToV0Message();
     const tx = new web3.VersionedTransaction(txMsg);
     tx.sign([payer, ...txInfo.signers]);
-    return tx;
+    return { tx , txInfo};
 }

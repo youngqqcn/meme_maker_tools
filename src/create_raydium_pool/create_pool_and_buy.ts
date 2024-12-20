@@ -13,6 +13,7 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { buildSwapTransaction } from "./build_swap_tx";
 import { getSlippage, sendAndConfirmTransactionEx } from "../base/utils";
 import { buildCreatePoolTransaction } from "./build_create_pool_tx";
+import { BaseRay } from "../base/baseRay";
 
 // 只能用主网来测试
 const RPC_URL =
@@ -47,14 +48,26 @@ const main = async () => {
     // let txSig = await sendAndConfirmTransactionEx(tx1, conn);
     // console.log("txSig", txSig);
 
-    let tx1 = await buildCreatePoolTransaction(conn, keypair, {
-        marketId: new PublicKey("HVtvzpyYjZkccKn31tszPGv1XH36Uq2dLs84pjdYnU6q"),
-        baseMintAmount: 10_0000_0000, // TODO
-        quoteMintAmount: 0.01, // TODO
-    });
+    // 共用一个 BaseRay对象，以便来获得 PoolKeys
+    const baseRay = new BaseRay({ rpcEndpointUrl: conn.rpcEndpoint });
 
-    let tx2 = await buildSwapTransaction(conn, keypair, {
-        poolId: new PublicKey("7ADYSXcAagy5LnkiNnb4o4uu1t7vtBtyPsAvvWSQ4Huq"),
+    let { tx: tx1, txInfo: tx1Info } = await buildCreatePoolTransaction(
+        baseRay,
+        conn,
+        keypair,
+        {
+            marketId: new PublicKey(
+                "HVtvzpyYjZkccKn31tszPGv1XH36Uq2dLs84pjdYnU6q"
+            ),
+            baseMintAmount: 10_0000_0000, // TODO
+            quoteMintAmount: 0.01, // TODO
+        }
+    );
+    let poolId = tx1Info.poolId;
+    console.log("poolId: ", poolId.toBase58());
+
+    let tx2 = await buildSwapTransaction(baseRay, conn, keypair, {
+        poolId: poolId,
         buyToken: "base", // 买入 Token
         sellToken: "quote",
         amountSide: "send",
