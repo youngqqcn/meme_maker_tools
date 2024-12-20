@@ -48,3 +48,10 @@ user_lp_amount = (liquidity - 10**6)
 ```
 
 与devnet环境测试结果相同 https://explorer.solana.com/address/3GaoXhTzoJTFDeDeucyT8rTHxUrqtdBur9MUCVVp6wFq?cluster=devnet
+
+
+
+## 创建Raydium池子 + 同时买入 捆绑交易
+
+成功：
+https://explorer.jito.wtf/bundle/37ad001fdac02ddfd542ab8a32e65a3f8b8c2c930d9a211ac2946bc05e39d94d

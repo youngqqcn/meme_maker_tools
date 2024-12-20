@@ -14,6 +14,7 @@ import { buildSwapTransaction } from "./build_swap_tx";
 import { getSlippage, sendAndConfirmTransactionEx } from "../base/utils";
 import { buildCreatePoolTransaction } from "./build_create_pool_tx";
 import { BaseRay } from "../base/baseRay";
+import { BN } from "@project-serum/anchor";
 
 // 只能用主网来测试
 const RPC_URL =
@@ -51,6 +52,11 @@ const main = async () => {
     // 共用一个 BaseRay对象，以便来获得 PoolKeys
     const baseRay = new BaseRay({ rpcEndpointUrl: conn.rpcEndpoint });
 
+    let baseMintAmount = 10_0000_0000;
+    let baseDecimals = 6;
+    let quoteMintAmount = 0.01;
+    let quoteDecimals = 9;
+
     let { tx: tx1, txInfo: tx1Info } = await buildCreatePoolTransaction(
         baseRay,
         conn,
@@ -59,21 +65,44 @@ const main = async () => {
             marketId: new PublicKey(
                 "HVtvzpyYjZkccKn31tszPGv1XH36Uq2dLs84pjdYnU6q"
             ),
-            baseMintAmount: 10_0000_0000, // TODO
-            quoteMintAmount: 0.01, // TODO
+            baseMintAmount: baseMintAmount, // TODO
+            quoteMintAmount: quoteMintAmount, // TODO
         }
     );
     let poolId = tx1Info.poolId;
     console.log("poolId: ", poolId.toBase58());
 
-    let tx2 = await buildSwapTransaction(baseRay, conn, keypair, {
-        poolId: poolId,
-        buyToken: "base", // 买入 Token
-        sellToken: "quote",
-        amountSide: "send",
-        amount: 0.1,
-        slippage: getSlippage(15),
-    });
+    // https://github.com/raydium-io/raydium-amm/blob/master/program/src/processor.rs#L1144-L1153
+    let lpSupply =
+        Math.round(
+            Math.sqrt(
+                baseMintAmount *
+                    Math.pow(10, baseDecimals) *
+                    quoteMintAmount *
+                    Math.pow(10, quoteDecimals)
+            )
+        ) - Math.pow(10, 6);
+    let baseReserve = Math.round(baseMintAmount * Math.pow(10, baseDecimals));
+    let quoteReserve = Math.round(
+        quoteMintAmount * Math.pow(10, quoteDecimals)
+    );
+
+    let tx2 = await buildSwapTransaction(
+        baseRay,
+        conn,
+        keypair,
+        {
+            poolId: poolId,
+            buyToken: "base", // 买入 Token
+            sellToken: "quote",
+            amountSide: "send",
+            amount: 0.1,
+            slippage: getSlippage(15),
+        },
+        new BN(lpSupply),
+        new BN(baseReserve),
+        new BN(quoteReserve)
+    );
 
     const result = await sendBundles(c, bundleTransactionLimit, keypair, conn, [
         tx1,

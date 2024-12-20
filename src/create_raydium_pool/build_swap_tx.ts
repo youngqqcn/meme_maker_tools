@@ -10,24 +10,28 @@ import {
 import { Percent } from "@raydium-io/raydium-sdk";
 import { VersionedTransaction } from "@solana/web3.js";
 import { Connection } from "@solana/web3.js";
+import { BN } from "@project-serum/anchor";
 const log = console.log;
 
 type SwapInput = {
     // marketId: PublicKey; //
-    poolId: PublicKey ; // 创建池子+购买捆绑， 此时poolId还是没有的
+    poolId: PublicKey; // 创建池子+购买捆绑， 此时poolId还是没有的
     buyToken: "base" | "quote";
     sellToken?: "base" | "quote";
     amountSide: "send" | "receive";
     amount: number;
     slippage: Percent;
-    // url: "mainnet" | "devnet";
 };
 
 export async function buildSwapTransaction(
     baseRay: BaseRay,
     connection: Connection,
     payer: Keypair,
-    input: SwapInput
+    input: SwapInput,
+
+    lpSupply: BN,
+    baseReserve: BN,
+    quoteReserve: BN
 ): Promise<VersionedTransaction> {
     if (input.sellToken) {
         if (input.sellToken == "base") {
@@ -53,15 +57,21 @@ export async function buildSwapTransaction(
         quoteToken: poolKeys.quoteMint.toBase58(),
     });
     const { amount, amountSide, buyToken } = input;
+
     const swapAmountInfo = await baseRay
-        .computeBuyAmount({
-            amount,
-            buyToken,
-            inputAmountType: amountSide,
-            poolKeys,
-            user: payer.publicKey,
-            slippage,
-        })
+        .computeBuyAmountBeforePoolCreate(
+            {
+                amount,
+                buyToken,
+                inputAmountType: amountSide,
+                poolKeys,
+                user: payer.publicKey,
+                slippage,
+            },
+            lpSupply,
+            baseReserve,
+            quoteReserve
+        )
         .catch((computeBuyAmountError) => log({ computeBuyAmountError }));
     if (!swapAmountInfo) throw Error("failed to calculate the amount");
     const { amountIn, amountOut, fixedSide, tokenAccountIn, tokenAccountOut } =
