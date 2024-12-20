@@ -6,13 +6,17 @@ import {
     TransactionMessage,
     VersionedTransaction,
 } from "@solana/web3.js";
+
+import * as web3 from "@solana/web3.js";
 import bs58 from "bs58";
 import {
     SearcherClient,
     SearcherClientError,
 } from "jito-ts/dist/sdk/block-engine/searcher";
 import { Bundle } from "jito-ts/dist/sdk/block-engine/types";
-import { isError, Result } from "jito-ts/dist/sdk/block-engine/utils";
+import { Err, isError, Result } from "jito-ts/dist/sdk/block-engine/utils";
+import { buildSwapTransaction } from "./build_swap_tx";
+import { getSlippage } from "../base/utils";
 
 const MEMO_PROGRAM_ID = "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo";
 
@@ -20,7 +24,8 @@ export const sendBundles = async (
     c: SearcherClient,
     bundleTransactionLimit: number,
     keypair: Keypair,
-    conn: Connection
+    conn: Connection,
+    txs: VersionedTransaction[]
 ): Promise<Result<string[], SearcherClientError>> => {
     try {
         const tipAccountResult = await c.getTipAccounts();
@@ -55,9 +60,14 @@ export const sendBundles = async (
 
         const bundles = [b];
 
-        let maybeBundle = b.addTransactions(
-            buildMemoTransaction(keypair, "jito test 1", blockHash.blockhash),
-            buildMemoTransaction(keypair, "jito test 2", blockHash.blockhash)
+        console.log("========$$$$$$$$===========$$$$$$$$$===========");
+
+        // 小费交易 必须在第一个， 否则失败
+        let maybeBundle = b.addTipTx(
+            keypair,
+            100_000,
+            tipAccount,
+            blockHash.blockhash
         );
         if (isError(maybeBundle)) {
             return {
@@ -69,14 +79,7 @@ export const sendBundles = async (
                 ),
             };
         }
-
-        maybeBundle = maybeBundle.addTipTx(
-            keypair,
-            10_000,
-            tipAccount,
-            blockHash.blockhash
-        );
-
+        maybeBundle.addTransactions(...txs);
         if (isError(maybeBundle)) {
             return {
                 ok: false,

@@ -6,7 +6,7 @@ import {
     getKeypairFromEnv,
     getSlippage,
     getTokenBalance,
-    sendAndConfirmTransaction,
+    sendAndConfirmTransactionEx,
     sleep,
 } from "../base/utils";
 import {
@@ -101,7 +101,7 @@ export async function swap(
     }).compileToV0Message();
     const tx = new web3.VersionedTransaction(txMsg);
     tx.sign([payer, ...txInfo.signers]);
-    const txSignature = await sendAndConfirmTransaction(tx, connection).catch(
+    const txSignature = await sendAndConfirmTransactionEx(tx, connection).catch(
         (sendAndConfirmTransactionError: any) => {
             log({ sendAndConfirmTransactionError });
             return null;
@@ -141,13 +141,32 @@ export async function swap(
         )
     );
     let ret = await swap(connection, payer, {
-        poolId: new PublicKey("ETMzB2FbNCQpSSPXf9dVgZDCqNfAzCRkpA78ueSsxVjV"),
+        poolId: new PublicKey("2yLEsHFPYZFzs2dmRXfFm4ujcLorDdnJSP34K1tQdDJ4"),
         buyToken: "base", // 买入 Token
         sellToken: "quote",
         amountSide: "receive",
         amount: 10000,
         slippage: getSlippage(15),
     });
+
+
+
+    // 全部卖完
+    // let balance = await getTokenBalance(
+    //     connection,
+    //     payer.publicKey,
+    //     new PublicKey("9FQbXGvfFa5HRZuKhceJD7dGzVJyhqoqqQmJ42RyUcgK")
+    // );
+    // console.log("token blaance: ", Number( balance))
+
+    // let ret = await swap(connection, payer, {
+    //     poolId: new PublicKey("ETMzB2FbNCQpSSPXf9dVgZDCqNfAzCRkpA78ueSsxVjV"),
+    //     buyToken: "quote", // 买入 Token
+    //     sellToken: "base",
+    //     amountSide: "send",
+    //     amount: Number(balance) / 10**6,
+    //     slippage: getSlippage(15),
+    // });
 
     console.log("ret", ret);
 })();

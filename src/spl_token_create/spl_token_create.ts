@@ -43,10 +43,12 @@ async function createSplToken(
 
     let keypair = Keypair.fromSecretKey(
         bs58.decode(
+            // "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
             "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
         )
     );
     let walletAdapter = new MyWalletAdapter(
+        // "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
         "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
     );
 
@@ -54,7 +56,7 @@ async function createSplToken(
     const mint = generateSigner(umi);
 
     // 修复 upload
-    const imgBuffer = fs.readFileSync("./src/spl_token_create/bbq.png");
+    const imgBuffer = fs.readFileSync("./src/spl_token_create/ROSE.png");
 
     const pinata = new PinataSDK({
         pinataJwt: NEXT_PUBLIC_PINATA_JWT,
@@ -62,8 +64,8 @@ async function createSplToken(
         pinataGateway: NEXT_PUBLIC_PINATE_GATEWAY,
     });
 
-    const upload = await pinata.upload.file(new File([imgBuffer], "BBQ.png"));
-    console.log("upload ", upload)
+    const upload = await pinata.upload.file(new File([imgBuffer], "ROSE.png"));
+    console.log("upload ", upload);
 
     if (upload.IpfsHash) {
         imageUri =
@@ -138,5 +140,11 @@ async function createSplToken(
 }
 
 (async () => {
-    await createSplToken("BBQ", "BBQ", "BBQ is BBQ", 6, 10_0000_0000);
+    await createSplToken(
+        "ROSE1220",
+        "ROSE1220",
+        "ROSE is a sexy woman.",
+        6,
+        10_0000_0000
+    );
 })();

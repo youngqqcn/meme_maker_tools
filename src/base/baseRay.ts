@@ -784,6 +784,7 @@ export class BaseRay {
                 8
             )
         );
+        console.log("baseAmount: ", Number(baseAmount));
         const quoteAmount = new BN(
             toBufferBE(
                 BigInt(
@@ -795,6 +796,7 @@ export class BaseRay {
                 8
             )
         );
+        console.log("quoteAmount: ", Number(quoteAmount));
         // const quoteAmount = new BN(calcNonDecimalValue(input.quoteMintAmount, quoteMintState.decimals))
 
         const poolInfo = Liquidity.getAssociatedPoolKeys({
@@ -1182,6 +1184,158 @@ export class BaseRay {
             toBufferBE(AccountLayout.decode(quoteVAccountInfo.data).amount, 8)
         ).addn(etc?.extraQuoteReserve ?? 0);
         let fixedSide: SwapSide;
+
+        console.log("lpMint = ", poolKeys.lpMint.toBase58());
+        console.log("lpSupply = ", Number(lpSupply));
+        console.log("baseMint = ", poolKeys.baseMint.toBase58());
+        console.log("baseVault = ", poolKeys.baseVault.toBase58());
+        console.log("baseReserve = ", Number(baseReserve));
+        console.log("quoteMint = ", poolKeys.quoteMint.toBase58());
+        console.log("quoteVault = ", poolKeys.quoteVault.toBase58());
+        console.log("quoteReserve = ", Number(quoteReserve));
+
+        const poolInfo: LiquidityPoolInfo = {
+            baseDecimals: poolKeys.baseDecimals,
+            quoteDecimals: poolKeys.quoteDecimals,
+            lpDecimals: poolKeys.lpDecimals,
+            lpSupply,
+            baseReserve,
+            quoteReserve,
+            startTime: null as any,
+            status: null as any,
+        };
+
+        if (inputAmountType == "send") {
+            fixedSide = "in";
+            if (buyToken == "base") {
+                amountIn = new TokenAmount(quoteR, amount.toString(), false);
+                // amountOut = Liquidity.computeAmountOut({ amountIn, currencyOut: baseR, poolInfo, poolKeys, slippage }).amountOut
+                amountOut = Liquidity.computeAmountOut({
+                    amountIn,
+                    currencyOut: baseR,
+                    poolInfo,
+                    poolKeys,
+                    slippage,
+                }).minAmountOut as TokenAmount;
+            } else {
+                amountIn = new TokenAmount(baseR, amount.toString(), false);
+                // amountOut = Liquidity.computeAmountOut({ amountIn, currencyOut: quoteR, poolInfo, poolKeys, slippage }).amountOut
+                amountOut = Liquidity.computeAmountOut({
+                    amountIn,
+                    currencyOut: quoteR,
+                    poolInfo,
+                    poolKeys,
+                    slippage,
+                }).minAmountOut as TokenAmount;
+            }
+        } else {
+            fixedSide = "out";
+            if (buyToken == "base") {
+                amountOut = new TokenAmount(baseR, amount.toString(), false);
+                // amountIn = Liquidity.computeAmountIn({ amountOut, currencyIn: quoteR, poolInfo, poolKeys, slippage }).amountIn
+                amountIn = Liquidity.computeAmountIn({
+                    amountOut,
+                    currencyIn: quoteR,
+                    poolInfo,
+                    poolKeys,
+                    slippage,
+                }).maxAmountIn as TokenAmount;
+            } else {
+                amountOut = new TokenAmount(quoteR, amount.toString(), false);
+                // amountIn = Liquidity.computeAmountIn({ amountOut, currencyIn: baseR, poolInfo, poolKeys, slippage }).amountIn
+                amountIn = Liquidity.computeAmountIn({
+                    amountOut,
+                    currencyIn: baseR,
+                    poolInfo,
+                    poolKeys,
+                    slippage,
+                }).maxAmountIn as TokenAmount;
+            }
+        }
+        if (buyToken == "base") {
+            tokenAccountOut = baseTokenAccount;
+            tokenAccountIn = quoteTokenAccount;
+        } else {
+            tokenAccountOut = quoteTokenAccount;
+            tokenAccountIn = baseTokenAccount;
+        }
+
+        return {
+            amountIn,
+            amountOut,
+            tokenAccountIn,
+            tokenAccountOut,
+            fixedSide,
+        };
+    }
+
+    /**
+     * 用于创建池子 + 捆绑购买， 此时池子信息没有，需要特殊处理
+     * @param input
+     * @param lpSupply  LP token的总量， 最小单位
+     * @param baseReserve  池子中 Base token的数量，最小单位
+     * @param quoteReserve 池子中 Quote token的数量，最小单位
+     * @param etc
+     * @returns
+     */
+    async computeBuyAmountBeforePoolCreate(
+        input: ComputeBuyAmountInput,
+        lpSupply: BN,
+        baseReserve: BN,
+        quoteReserve: BN,
+        etc?: {
+            extraBaseResever?: number;
+            extraQuoteReserve?: number;
+            extraLpSupply?: number;
+        }
+    ) {
+        const { amount, buyToken, inputAmountType, poolKeys, user } = input;
+        const slippage = input.slippage ?? new Percent(1, 100);
+        const base = poolKeys.baseMint;
+        const baseMintDecimals = poolKeys.baseDecimals;
+        const quote = poolKeys.quoteMint;
+        const quoteMintDecimals = poolKeys.quoteDecimals;
+        const baseTokenAccount = getAssociatedTokenAddressSync(base, user);
+        const quoteTokenAccount = getAssociatedTokenAddressSync(quote, user);
+        const baseR = new Token(TOKEN_PROGRAM_ID, base, baseMintDecimals);
+        const quoteR = new Token(TOKEN_PROGRAM_ID, quote, quoteMintDecimals);
+        let amountIn: TokenAmount;
+        let amountOut: TokenAmount;
+        let tokenAccountIn: web3.PublicKey;
+        let tokenAccountOut: web3.PublicKey;
+        // const [lpAccountInfo, baseVAccountInfo, quoteVAccountInfo] =
+        //     await this.connection
+        //         .getMultipleAccountsInfo(
+        //             [
+        //                 poolKeys.lpMint,
+        //                 poolKeys.baseVault,
+        //                 poolKeys.quoteVault,
+        //             ].map((e) => new web3.PublicKey(e))
+        //         )
+        //         .catch(() => [null, null, null, null]);
+        // if (!lpAccountInfo || !baseVAccountInfo || !quoteVAccountInfo)
+        //     throw "Failed to fetch some data";
+
+        // const lpSupply = new BN(
+        //     toBufferBE(MintLayout.decode(lpAccountInfo.data).supply, 8)
+        // ).addn(etc?.extraLpSupply ?? 0);
+        // const baseReserve = new BN(
+        //     toBufferBE(AccountLayout.decode(baseVAccountInfo.data).amount, 8)
+        // ).addn(etc?.extraBaseResever ?? 0);
+        // const quoteReserve = new BN(
+        //     toBufferBE(AccountLayout.decode(quoteVAccountInfo.data).amount, 8)
+        // ).addn(etc?.extraQuoteReserve ?? 0);
+
+        let fixedSide: SwapSide;
+
+        console.log("lpMint = ", poolKeys.lpMint.toBase58());
+        console.log("lpSupply = ", Number(lpSupply));
+        console.log("baseMint = ", poolKeys.baseMint.toBase58());
+        console.log("baseVault = ", poolKeys.baseVault.toBase58());
+        console.log("baseReserve = ", Number(baseReserve));
+        console.log("quoteMint = ", poolKeys.quoteMint.toBase58());
+        console.log("quoteVault = ", poolKeys.quoteVault.toBase58());
+        console.log("quoteReserve = ", Number(quoteReserve));
 
         const poolInfo: LiquidityPoolInfo = {
             baseDecimals: poolKeys.baseDecimals,

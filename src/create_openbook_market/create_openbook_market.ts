@@ -147,6 +147,7 @@ export async function createMarket(
 
 (async () => {
     let rpc_url = "";
+    // let network = "mainnet";
     let network = "devnet";
     if (network == "devnet") {
         rpc_url =
@@ -162,9 +163,11 @@ export async function createMarket(
         confirmTransactionInitialTimeout: 60000,
     });
 
-    let mint = new PublicKey("9FQbXGvfFa5HRZuKhceJD7dGzVJyhqoqqQmJ42RyUcgK");
+    // let mint = new PublicKey("7ADYSXcAagy5LnkiNnb4o4uu1t7vtBtyPsAvvWSQ4Huq");
+    let mint = new PublicKey("F7S59s66o1Q1Meps2hAMRoRzQGMX9tPMzRYtGPaT1MQ6");
     let payer = Keypair.fromSecretKey(
         bs58.decode(
+            // "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
             "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
         )
     );

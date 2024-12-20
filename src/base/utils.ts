@@ -1,7 +1,7 @@
 import { web3 } from "@project-serum/anchor";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { Result } from "./types";
-import { AccountLayout } from "@solana/spl-token";
+import { AccountLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Percent } from "@raydium-io/raydium-sdk";
 
 export function calcNonDecimalValue(value: number, decimals: number): number {
@@ -83,7 +83,7 @@ export async function createLookupTable(
     }
 }
 
-export async function sendAndConfirmTransaction(
+export async function sendAndConfirmTransactionEx(
     tx: web3.VersionedTransaction | web3.Transaction,
     connection: web3.Connection
 ) {
@@ -114,7 +114,7 @@ export async function getTokenBalance(
     connection: web3.Connection,
     owner: web3.PublicKey,
     mint: web3.PublicKey,
-    programId: web3.PublicKey
+    programId: web3.PublicKey = TOKEN_PROGRAM_ID
 ): Promise<bigint> {
     const tokenAccounts = await connection.getTokenAccountsByOwner(owner, {
         programId: programId,
