@@ -26,7 +26,7 @@ import {
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 const log = console.log;
 
-type SwapInput = {
+export type SwapInput = {
     poolId: web3.PublicKey;
     buyToken: "base" | "quote";
     sellToken?: "base" | "quote";
@@ -35,6 +35,10 @@ type SwapInput = {
     slippage: Percent;
     // url: "mainnet" | "devnet";
 };
+
+
+
+
 
 export async function swap(
     connection: Connection,
@@ -48,6 +52,7 @@ export async function swap(
             input.buyToken = "base";
         }
     }
+    // console.log("swap: ", input);
 
     const baseRay = new BaseRay({ rpcEndpointUrl: connection.rpcEndpoint });
     const slippage = input.slippage;
@@ -148,8 +153,6 @@ export async function swap(
         amount: 10000,
         slippage: getSlippage(15),
     });
-
-
 
     // 全部卖完
     // let balance = await getTokenBalance(

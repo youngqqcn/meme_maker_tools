@@ -104,3 +104,14 @@ export async function sol_transfer(
 
     console.log("signature: ", signature.toString());
 }
+
+
+/**
+ * 生成指定范围内的随机数
+ * @param min 最小值（包含）
+ * @param max 最大值（包含）
+ * @returns 范围内的随机数
+ */
+export function getRandomInRange(min: number, max: number): number {
+    return Math.random() * (max - min) + min;
+}
