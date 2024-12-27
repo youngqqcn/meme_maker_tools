@@ -15,7 +15,6 @@ import { getRandomInRange, parseCsvFile } from "../../utils";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
 import { getSlippage, sleep } from "../../base/utils";
-import { getRandomValues } from "crypto";
 interface CsvRecord {
     key: string;
 }
@@ -45,38 +44,40 @@ interface CsvRecord {
     let poolId = new PublicKey("2yLEsHFPYZFzs2dmRXfFm4ujcLorDdnJSP34K1tQdDJ4");
     let sleep_ms = 10_000; // 间隔时间(毫秒)
 
-    for (let data of datas) {
-        console.log("===============");
-        console.log(data.key);
+    while (true) {
+        for (let data of datas) {
+            console.log("===============");
+            console.log(data.key);
 
-        let from = Keypair.fromSecretKey(
-            Uint8Array.from(bs58.decode(data.key.trim()))
-        );
-        console.log(`当前处理: ${from.publicKey.toBase58()} `);
+            let from = Keypair.fromSecretKey(
+                Uint8Array.from(bs58.decode(data.key.trim()))
+            );
+            console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
-        let amount = Math.round(getRandomInRange(10000, 20000));
+            let amount = Math.round(getRandomInRange(10000, 20000));
 
-        console.log("买入数量: ", amount);
+            console.log("买入数量: ", amount);
 
-        // 买入
-        try {
-            let ret = await swap(connection, from, {
-                poolId: poolId,
-                buyToken: "base", // 买入 Token
-                sellToken: "quote",
-                amountSide: "receive",
-                amount: amount,
-                slippage: getSlippage(10),
-            });
-            if (ret.Err) {
-                console.error(ret.Err);
-            } else {
-                console.log("sig:", ret.Ok?.txSignature);
+            // 买入
+            try {
+                let ret = await swap(connection, from, {
+                    poolId: poolId,
+                    buyToken: "base", // 买入 Token
+                    sellToken: "quote",
+                    amountSide: "receive",
+                    amount: amount,
+                    slippage: getSlippage(10),
+                });
+                if (ret.Err) {
+                    console.error(ret.Err);
+                } else {
+                    console.log("sig:", ret.Ok?.txSignature);
+                }
+            } catch (e) {
+                console.log("swap error:", e);
             }
-        } catch (e) {
-            console.log("swap error:", e);
-        }
 
-        await sleep(sleep_ms);
+            await sleep(sleep_ms);
+        }
     }
 })();

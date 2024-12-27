@@ -36,10 +36,6 @@ export type SwapInput = {
     // url: "mainnet" | "devnet";
 };
 
-
-
-
-
 export async function swap(
     connection: Connection,
     payer: Keypair,
@@ -122,7 +118,7 @@ export async function swap(
     };
 }
 
-(async () => {
+async function xxx() {
     let rpc_url = "";
     let network = "devnet";
     if (network == "devnet") {
@@ -172,4 +168,8 @@ export async function swap(
     // });
 
     console.log("ret", ret);
-})();
+}
+
+// xxx()
+//     .catch((e) => console.log(e))
+//     .then();
