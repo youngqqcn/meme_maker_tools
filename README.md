@@ -12,7 +12,7 @@
 |08|[Raydium批量交易(拉升)](./src/trade_on_raydium/pump/) |  100% | TypeScript|
 |09|[Raydium批量交易(下跌)](./src/trade_on_raydium/dump/) |  100% | TypeScript|
 |10|[Raydium批量交易(刷量)](./src/trade_on_raydium/volume/) |  100% | TypeScript|
-|11[批量关闭账户回收租金](./src/spl_token_close_account/)| 100%| TypeScript|
+|11|[批量关闭账户回收租金](./src/spl_token_close_account/)| 100%| TypeScript|
 
 
 # 运行
