@@ -1,12 +1,26 @@
-# meme_maker_tools
-meme做市工具合集
+# MEME币做市工具合集(源代码保密,禁止!)
+
+| 工具  | 当前进度 | 开发语言 |
+|---|--------| -- |
+|[批量生成地址工具](./generate_address/)|100%| Python |
+|[交易所批量提币工具(Gate.io)](./exchange_withdraw/) | 100% | TypeScript |
+|[创建Token工具](./src/spl_token_create/) | 100% | TypeScript |
+|[Raydium建池子+捆绑买入](./src/create_raydium_pool/create_pool_and_buy.ts) | 100%| TypeScript |
+|[Token批量转账工具](./src/spl_m2m_token_transfer)| 100% | TypeScript|
+|[SOL批量转账工具](./src/sol_m2m_transfer/) |100%| TypeScript|
+|[OpenBook Market创建工具](./src/create_openbook_market/)|100%| TypeScript|
+|[Raydium批量交易(拉升)](./src/trade_on_raydium/pump/) |  100% | TypeScript|
+|[Raydium批量交易(下跌)](./src/trade_on_raydium/dump/) |  100% | TypeScript|
+|[Raydium批量交易(刷量)](./src/trade_on_raydium/volume/) |  100% | TypeScript|
+|[批量关闭账户回收租金](./src/spl_token_close_account/)| 100%| TypeScript|
 
 
-| 工具  | 当前状态 |
-|---|--------|
-| 创建Token工具 | - |
-|批量提币工具 | 完成 |
-| Raydium建池子+捆绑买入 | - |
-|Token批量转账工具| - |
-|批量关闭账户回收租金| -|
-| Raydium批量交易 | - |
+# 运行
+
+
+- 安装依赖: `yarn`
+- 运行工具，例如运行批量Token转账的工具:
+  - `cd src/spl_m2m_token_transfer`
+  - `cp m2m.csv.example m2m.csv`
+  - 填写csv文件
+  - `ts-node m2m.ts`

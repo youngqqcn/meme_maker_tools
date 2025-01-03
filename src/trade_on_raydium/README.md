@@ -1,0 +1,16 @@
+# Raydium做市工具
+- pump：拉升
+  - `cd pump`
+  - `cp pump_price.csv.example pump_price.csv`
+  - 填写私钥
+  - `ts-node pump_price.ts`
+- dump： 下跌
+  - `cd dump`
+  - `cp dump_price.csv.example dump_price.csv`
+  - 填写私钥
+  - `ts-node dump_price.ts`
+- volume: 刷量
+  - `cd volume`
+  - `cp volume.csv.example volume.csv`
+  - 填写私钥
+  - `ts-node volume.ts`
