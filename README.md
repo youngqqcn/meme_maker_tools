@@ -21,7 +21,8 @@
 # 运行
 
 
-- 安装依赖: `yarn`
+- 安装typescript依赖: `yarn`
+- 安装python以来:  `poetry shell && poetry install`
 - 运行工具，例如运行批量Token转账的工具:
   - `cd src/spl_m2m_token_transfer`
   - `cp m2m.csv.example m2m.csv`
