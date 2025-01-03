@@ -147,7 +147,7 @@ export async function createPool(
     // let mint = new PublicKey("9FQbXGvfFa5HRZuKhceJD7dGzVJyhqoqqQmJ42RyUcgK");
     let payer = Keypair.fromSecretKey(
         bs58.decode(
-            "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
+            "YOURKEY"
         )
     );
 

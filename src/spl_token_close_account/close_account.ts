@@ -48,13 +48,27 @@ export async function closeTokenAccount(
         payer.publicKey,
         owner.publicKey
     );
-    // speedup
-    // const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
-    //     microLamports: 3_000_000,
-    // });
+
+    // 加速 speedup
+    const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: 1_000_000, // 1 lamports
+    });
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-    // const tx = new web3.Transaction().add(updateCuIx, ixBurn, ixClose);
-    const tx = new web3.Transaction().add(ixBurn, ixClose);
+
+    let tx = new web3.Transaction().add(updateCuIx, ixBurn, ixClose);
+
+    // 如果是 Wrapped SOL ，不要销毁，只需Close, SOL会自动redeem为SOL
+    if (
+        mint.equals(
+            new PublicKey("So11111111111111111111111111111111111111112")
+        )
+    ) {
+        tx = new web3.Transaction().add(updateCuIx, ixClose);
+    }
+
+    // 省钱
+    // const tx = new web3.Transaction().add(ixBurn, ixClose);
+
     tx.feePayer = payer.publicKey;
     tx.recentBlockhash = recentBlockhash;
     tx.sign(payer, owner);
@@ -80,12 +94,12 @@ export async function closeTokenAccount(
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 
     const RPC_ENDPOINT_DEV =
-        "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+        "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 
-    const connection = new Connection(RPC_ENDPOINT_DEV, {
+    const connection = new Connection(RPC_ENDPOINT_MAIN, {
         commitment: "confirmed",
         confirmTransactionInitialTimeout: 60000,
     });

@@ -167,8 +167,7 @@ export async function createMarket(
     let mint = new PublicKey("F7S59s66o1Q1Meps2hAMRoRzQGMX9tPMzRYtGPaT1MQ6");
     let payer = Keypair.fromSecretKey(
         bs58.decode(
-            // "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
-            "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
+            "YOURKEY"
         )
     );
 

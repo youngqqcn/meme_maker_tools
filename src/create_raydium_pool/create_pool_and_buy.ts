@@ -33,7 +33,7 @@ const main = async () => {
 
     const keypair = Keypair.fromSecretKey(
         bs58.decode(
-            "3pTyHxqf4a3HZyK4QSaorRhHJsd1HqByDmVX592Bq66TTMPUDMtZSNpwM4aGMRx1ZPbCxywbnR33aLPtvnpQEP3D"
+            "YOURKEY"
         )
     );
 
