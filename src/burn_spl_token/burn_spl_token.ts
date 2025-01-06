@@ -22,23 +22,32 @@ export async function burnToken(
     owner: Keypair,
     burnAmount: number
 ) {
-    console.log("=========closeTokenAccount=============");
+    console.log("=========burnToken=============");
     const ata = getAssociatedTokenAddressSync(mint, owner.publicKey);
 
     let amount = null;
+    let isClose = false;
     try {
-        amount = await getTokenBalance(connection, owner.publicKey, mint);
-        if (burnAmount > 0 && burnAmount > Number(amount)) {
-            console.log(
-                "账户token余额: ",
-                amount,
-                "小于要燃烧的金额 ",
-                burnAmount,
-                ", 请检查。 如需要全部燃烧，则只需将amount设置为0即可全部销毁"
-            );
-            return;
+        let balance = await getTokenBalance(connection, owner.publicKey, mint);
+        if (burnAmount > 0) {
+            if (burnAmount > Number(balance)) {
+                console.log(
+                    "账户token余额: ",
+                    amount,
+                    "小于要燃烧的金额 ",
+                    burnAmount,
+                    ", 请检查。 如需要全部燃烧，则只需将amount设置为0即可全部销毁"
+                );
+                return;
+            } else {
+                amount = burnAmount; // 这里没有乘以精度
+                if (burnAmount == Number(balance)) {
+                    isClose = true;
+                }
+            }
         } else {
-            amount = burnAmount; // 这里没有乘以精度
+            amount = Number(balance);
+            isClose = true; // 全部销毁，关闭账户
         }
     } finally {
         if (!amount) {
@@ -67,7 +76,13 @@ export async function burnToken(
     });
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    let tx = new web3.Transaction().add(updateCuIx, ixBurn);
+    let tx = new web3.Transaction().add(updateCuIx);
+    if (Number(amount) > 0) {
+        tx.add(ixBurn); // 销毁
+    }
+    if (isClose) {
+        tx.add(ixClose);
+    }
 
     // 如果是 Wrapped SOL ，不要销毁，只需Close, SOL会自动redeem为SOL
     if (
@@ -130,5 +145,5 @@ export async function burnToken(
         await burnToken(connection, mint, owner, data.amount);
     }
 })().catch((x) => {
-    console.log(x)
+    console.log(x);
 });
