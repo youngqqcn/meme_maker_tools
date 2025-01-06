@@ -1,4 +1,4 @@
-// 创建 raydium池子
+// 销毁SPL Token
 import { getTokenBalance, parseCsvFile, sleep } from "../utils";
 import * as web3 from "@solana/web3.js";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
