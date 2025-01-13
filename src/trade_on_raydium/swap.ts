@@ -16,7 +16,12 @@ import {
     RPC_ENDPOINT_MAIN,
 } from "../base/config";
 import { BaseRay } from "../base/baseRay";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import {
+    Connection,
+    Keypair,
+    LAMPORTS_PER_SOL,
+    PublicKey,
+} from "@solana/web3.js";
 import { Percent, TOKEN_PROGRAM_ID } from "@raydium-io/raydium-sdk";
 import {
     createCloseAccountInstruction,
@@ -24,6 +29,10 @@ import {
     NATIVE_MINT,
 } from "@solana/spl-token";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { getRandomElement, getRandomElementX } from "../utils";
+import { sendTxUsingJito } from "./sendTxWithJito";
+import { onBundleResult, sendBundles } from "../create_raydium_pool/utils";
+import { searcherClient } from "jito-ts/dist/sdk/block-engine/searcher";
 const log = console.log;
 
 export type SwapInput = {
@@ -31,7 +40,7 @@ export type SwapInput = {
     buyToken: "base" | "quote";
     sellToken?: "base" | "quote";
     amountSide: "send" | "receive";
-    amount: number;
+    amount: number; // 浮点数， 内部会转为token最小单位
     slippage: Percent;
     // url: "mainnet" | "devnet";
 };
@@ -95,27 +104,77 @@ export async function swap(
         });
     if (!txInfo) return { Err: "failed to prepare swap transaction" };
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    // 更新计算单元价格
+    const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
+        microLamports: COMPUTE_UNIT_PRICE,
+    });
+
+    // 增加 jito 小费
+    let tipAccount = getRandomElementX([
+        new PublicKey("96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5"),
+        new PublicKey("HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe"),
+        new PublicKey("Cw8CFyM9FkoMi7K7Crf6HNQqf4uEMzpKw6QNghXLvLkY"),
+        new PublicKey("ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49"),
+        new PublicKey("DfXygSm4jCyNCybVYYK6DwvWqjKee8pbDmJGcLWNDXjh"),
+        new PublicKey("ADuUkR4vqLUMWXxW9gh6D6L8pMSawimctcNZ5pGwDcEt"),
+        new PublicKey("DttWaMuVvTiduZRnguLF7jNxTgiMBZ1hyAumKUiL2KRL"),
+        new PublicKey("3AVi9Tg9Uo68tJfuvoKvqKNWKkC5wPdSSdeBnizKZ6jT"),
+    ]);
+    const jitoTipIx = web3.SystemProgram.transfer({
+        fromPubkey: payer.publicKey,
+        toPubkey: tipAccount,
+        lamports: 0.001 * LAMPORTS_PER_SOL,
+    });
+
+    console.log("txInfo.ixs长度: ", txInfo.ixs.length);
+
     const txMsg = new web3.TransactionMessage({
-        instructions: txInfo.ixs,
+        instructions: [updateCuIx, jitoTipIx, ...txInfo.ixs],
+        // instructions: [updateCuIx, ...txInfo.ixs],
         payerKey: payer.publicKey,
         recentBlockhash,
     }).compileToV0Message();
     const tx = new web3.VersionedTransaction(txMsg);
     tx.sign([payer, ...txInfo.signers]);
-    const txSignature = await sendAndConfirmTransactionEx(tx, connection).catch(
-        (sendAndConfirmTransactionError: any) => {
-            log({ sendAndConfirmTransactionError });
-            return null;
-        }
-    );
-    if (!txSignature) {
-        return { Err: "Failed to send transaction" };
-    }
+
+    let rsp = await sendTxUsingJito(tx);
+    console.log("rsp: ", rsp);
+
     return {
         Ok: {
-            txSignature,
+            txSignature: rsp["result"],
         },
     };
+
+    // 使用Bundle发送
+    // const blockEngineUrl = "mainnet.block-engine.jito.wtf";
+    // console.log("BLOCK_ENGINE_URL:", blockEngineUrl);
+    // // const bundleTransactionLimit = BUNDLE_TRANSACTION_LIMIT;
+    // const c = searcherClient(blockEngineUrl);
+    // let x = await sendBundles(c, 5, payer, connection, [tx]);
+    // onBundleResult(c);
+    // return {
+    //     Ok: {
+    //         txSignature: "",
+    //     },
+    // };
+
+    // 使用公共节点发送交易
+    // const txSignature = await sendAndConfirmTransactionEx(tx, connection).catch(
+    //     (sendAndConfirmTransactionError: any) => {
+    //         log({ sendAndConfirmTransactionError });
+    //         return null;
+    //     }
+    // );
+    // if (!txSignature) {
+    //     return { Err: "Failed to send transaction" };
+    // }
+    // return {
+    //     Ok: {
+    //         txSignature,
+    //     },
+    // };
 }
 
 async function xxx() {
@@ -123,10 +182,10 @@ async function xxx() {
     let network = "devnet";
     if (network == "devnet") {
         rpc_url =
-            "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+            "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
     } else {
         rpc_url =
-            "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+            "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
         network = "mainnet";
     }
 

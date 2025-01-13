@@ -637,6 +637,8 @@ export class BaseRay {
                 this.ixsAdderCallback
             );
         const inToken = (amountIn as TokenAmount).token.mint;
+        // console.log("========amountIn: ", amountIn)
+
         if (inToken.toBase58() == NATIVE_MINT.toBase58()) {
             let lamports = BigInt(amountIn.raw.toNumber());
             const sendSolIx = web3.SystemProgram.transfer({

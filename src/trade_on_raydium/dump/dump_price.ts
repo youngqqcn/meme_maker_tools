@@ -13,12 +13,12 @@ interface CsvRecord {
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 
     const RPC_ENDPOINT_DEV =
-        "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+        "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 
-    let connection = new Connection(RPC_ENDPOINT_DEV, {
+    let connection = new Connection(RPC_ENDPOINT_MAIN, {
         commitment: "confirmed",
         confirmTransactionInitialTimeout: 60000,
     });
@@ -33,7 +33,7 @@ interface CsvRecord {
     }
     console.log("datas长度", datas.length);
 
-    let poolId = new PublicKey("2yLEsHFPYZFzs2dmRXfFm4ujcLorDdnJSP34K1tQdDJ4");
+    let poolId = new PublicKey("21WUaeHRDVnCDaC3ZPh8veJ3TiAxdV1rWJ6nZeqvAAwo");
     let sleep_ms = 10_000; // 间隔时间(毫秒)
 
     while (true) {
@@ -47,7 +47,7 @@ interface CsvRecord {
             console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
             let mint = new PublicKey(
-                "F7S59s66o1Q1Meps2hAMRoRzQGMX9tPMzRYtGPaT1MQ6"
+                "BR4wVy6vXjPoAzJiGmoSpcDbw9tUEbkRhomRQJXVpump"
             );
             let balance = await getTokenBalance(
                 connection,
@@ -58,7 +58,9 @@ interface CsvRecord {
                 console.log("token余额为0");
                 continue;
             }
-            let amount = Math.round(getRandomInRange(10000, 20000));
+
+            // let amount = Math.round(getRandomInRange(10000, 20000));
+            let amount = 7192970.82;
             if (amount > balance) {
                 amount = Number(balance);
             }
@@ -67,13 +69,23 @@ interface CsvRecord {
 
             // 卖出token
             try {
+                // let ret = await swap(connection, from, {
+                //     poolId: poolId,
+                //     buyToken: "quote",
+                //     sellToken: "base",
+                //     amountSide: "send",
+                //     amount: amount,
+                //     slippage: getSlippage(10),
+                // });
+
+                // 特别注意： 从pump.fun发出来的token, 其quote是token, 其base是SOL
                 let ret = await swap(connection, from, {
                     poolId: poolId,
-                    buyToken: "quote",
-                    sellToken: "base",
+                    buyToken: "base",
+                    sellToken: "quote",
                     amountSide: "send",
                     amount: amount,
-                    slippage: getSlippage(10),
+                    slippage: getSlippage(15),
                 });
                 if (ret.Err) {
                     console.error(ret.Err);

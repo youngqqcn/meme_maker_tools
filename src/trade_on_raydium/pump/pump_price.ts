@@ -15,18 +15,19 @@ import { getRandomInRange, parseCsvFile } from "../../utils";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
 import { getSlippage, sleep } from "../../base/utils";
+import { Liquidity } from "@raydium-io/raydium-sdk";
 interface CsvRecord {
     key: string;
 }
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 
     const RPC_ENDPOINT_DEV =
-        "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+        "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 
-    let connection = new Connection(RPC_ENDPOINT_DEV, {
+    let connection = new Connection(RPC_ENDPOINT_MAIN, {
         commitment: "confirmed",
         confirmTransactionInitialTimeout: 60000,
     });
@@ -41,8 +42,16 @@ interface CsvRecord {
     }
     console.log("datas长度", datas.length);
 
-    let poolId = new PublicKey("2yLEsHFPYZFzs2dmRXfFm4ujcLorDdnJSP34K1tQdDJ4");
     let sleep_ms = 10_000; // 间隔时间(毫秒)
+
+    let poolId = new PublicKey("21WUaeHRDVnCDaC3ZPh8veJ3TiAxdV1rWJ6nZeqvAAwo");
+    // let poolId = Liquidity.getAssociatedId({
+    //     marketId: new PublicKey("5cZNpyTv3maQyHMaRPsbuRg8zupsW6N7jn94XjYr5ypr"),
+    //     programId: new PublicKey(
+    //         "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+    //     ), // mainnet
+    // });
+    console.log("poolId: ", poolId.toBase58());
 
     while (true) {
         for (let data of datas) {
@@ -54,20 +63,35 @@ interface CsvRecord {
             );
             console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
-            let amount = Math.round(getRandomInRange(10000, 20000));
+            // let amount = Math.round(getRandomInRange(1000, 5000));
+            let amount = 0.10  // 按照SOL数量购买
 
             console.log("买入数量: ", amount);
 
             // 买入
             try {
+                // 特别注意： 要注意却分base 和 quote , 使用自己工具建的池子，base是token, quote是SOL
+                // let ret = await swap(connection, from, {
+                //     poolId: poolId,
+                //     buyToken: "base", // 买入 Token
+                //     sellToken: "quote",
+                //     amountSide: "receive",
+                //     amount: amount,
+                //     slippage: getSlippage(10),
+                // });
+
+
+                // 特别注意： 从pump.fun发出来的token, 其quote是token, 其base是SOL
+                // 按照 SOL 数量购买
                 let ret = await swap(connection, from, {
                     poolId: poolId,
-                    buyToken: "base", // 买入 Token
-                    sellToken: "quote",
-                    amountSide: "receive",
+                    buyToken: "quote",//"base",
+                    sellToken: "base",//"quote",
+                    amountSide: "send",
                     amount: amount,
-                    slippage: getSlippage(10),
+                    slippage: getSlippage(15),
                 });
+
                 if (ret.Err) {
                     console.error(ret.Err);
                 } else {

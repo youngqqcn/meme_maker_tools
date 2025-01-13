@@ -64,6 +64,12 @@ export const getRandomElement = <T>(list: T[]): T | undefined => {
     return list[randomIndex];
 };
 
+export const getRandomElementX = <T>(list: T[]): T  => {
+    const randomIndex = Math.floor(Math.random() * list.length);
+    return list[randomIndex];
+};
+
+
 export async function sol_transfer(
     connection: Connection,
     from: Keypair,
