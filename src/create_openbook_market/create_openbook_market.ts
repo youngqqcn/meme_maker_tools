@@ -151,10 +151,10 @@ export async function createMarket(
     let network = "devnet";
     if (network == "devnet") {
         rpc_url =
-            "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+            "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
     } else {
         rpc_url =
-            "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+            "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
         network = "mainnet";
     }
 
