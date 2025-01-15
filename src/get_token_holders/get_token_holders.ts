@@ -79,8 +79,7 @@ async function getTokenHolders() {
 
         // 获取holders
         let holders = await getTokenHolders();
-        console.log(holders);
-        console.log("总共持仓地址: ", holders.size);
+        // console.log(holders);
 
         // 挑出外部地址
         let innerAddrMap = new Map();
@@ -90,14 +89,23 @@ async function getTokenHolders() {
 
         console.log("===========外部地址=========");
         let extAmountTokenSum = 0;
+        let extAddrCount = 0;
         for (let [k, v] of holders) {
             if (!innerAddrMap.has(k)) {
                 console.log(v);
-                extAmountTokenSum += v['balance'];
+                extAmountTokenSum += v["balance"];
+                extAddrCount += 1;
             }
         }
-        console.log("外部总token数: ", extAmountTokenSum/10**6)
-        console.log("外部总token占比: ", (extAmountTokenSum/(10_0000_0000*10**6))*100 , "%")
+        console.log("==========================")
+        console.log("总共持仓地址: ", holders.size);
+        console.log("外部持仓地址数: ", extAddrCount);
+        console.log("外部总token数: ", extAmountTokenSum / 10 ** 6);
+        console.log(
+            "外部总token占比: ",
+            ((extAmountTokenSum / (10_0000_0000 * 10 ** 6)) * 100).toFixed(3),
+            "%"
+        );
     } catch (e) {
         console.log("error", e);
     }
