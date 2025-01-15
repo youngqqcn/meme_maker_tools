@@ -8,6 +8,12 @@ import {
     getAssociatedTokenAddressSync,
     TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
+import { parseCsvFile } from "../utils";
+import { tryResolvePackage } from "tslint/lib/utils";
+
+interface CsvRecord {
+    address: string;
+}
 
 // Solana RPC连接
 const connection = new Connection(
@@ -37,6 +43,7 @@ async function getTokenHolders() {
     });
     // console.log(accounts);
 
+    //账户数据结构： https://github.com/solana-program/token/blob/main/program/src/state.rs#L89-L110
     const holders = accounts.map((account) => {
         const accountInfo = account.account.data;
         const tokenAmount = accountInfo.slice(64, 72); // 余额在Account的第64-72字节
@@ -44,27 +51,54 @@ async function getTokenHolders() {
         const holderAddress = account.pubkey.toString();
 
         // 获取持币者地址（ATA账户的所有者地址）
-        const ownerBuffer = accountInfo.slice(0, 32); // 从前32字节获取所有者地址
+        const ownerBuffer = accountInfo.slice(32, 64); //
         const ownerAddress = new PublicKey(ownerBuffer);
 
         return {
             holderAddress,
             ownerAddress: ownerAddress.toBase58(),
-            balance: balance.toString(),
+            balance: Number(balance),
         };
     });
 
     // let holders = [""];
     // console.log(holders);
 
-    return holders;
+    const addresses = new Map();
+    for (let holder of holders) {
+        addresses.set(holder.ownerAddress, holder);
+    }
+
+    return addresses;
 }
 
-getTokenHolders()
-    .then((holders) => {
+(async () => {
+    try {
+        let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data.csv");
+        console.log("地址数", datas.length);
+
+        // 获取holders
+        let holders = await getTokenHolders();
         console.log(holders);
-        console.log("总共持仓地址: ", holders.length)
-    })
-    .catch((err) => {
-        console.error(err);
-    });
+        console.log("总共持仓地址: ", holders.size);
+
+        // 挑出外部地址
+        let innerAddrMap = new Map();
+        for (let d of datas) {
+            innerAddrMap.set(d.address.trim(), d.address.trim());
+        }
+
+        console.log("===========外部地址=========");
+        let extAmountTokenSum = 0;
+        for (let [k, v] of holders) {
+            if (!innerAddrMap.has(k)) {
+                console.log(v);
+                extAmountTokenSum += v['balance'];
+            }
+        }
+        console.log("外部总token数: ", extAmountTokenSum/10**6)
+        console.log("外部总token占比: ", (extAmountTokenSum/(10_0000_0000*10**6))*100 , "%")
+    } catch (e) {
+        console.log("error", e);
+    }
+})();
