@@ -48,7 +48,9 @@ export type SwapInput = {
 export async function swap(
     connection: Connection,
     payer: Keypair,
-    input: SwapInput
+    input: SwapInput,
+    unitPrice: number = 10_000_000, // 10 lamport per unit
+    jitoTip: number = 0.001
 ): Promise<Result<{ txSignature: string }, string>> {
     if (input.sellToken) {
         if (input.sellToken == "base") {
@@ -107,7 +109,7 @@ export async function swap(
 
     // 更新计算单元价格
     const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: COMPUTE_UNIT_PRICE,
+        microLamports: unitPrice,
     });
 
     // 增加 jito 小费
@@ -124,7 +126,7 @@ export async function swap(
     const jitoTipIx = web3.SystemProgram.transfer({
         fromPubkey: payer.publicKey,
         toPubkey: tipAccount,
-        lamports: 0.001 * LAMPORTS_PER_SOL,
+        lamports: jitoTip * LAMPORTS_PER_SOL,
     });
 
     console.log("txInfo.ixs长度: ", txInfo.ixs.length);
@@ -149,6 +151,7 @@ export async function swap(
 
     // 使用Bundle发送
     // const blockEngineUrl = "mainnet.block-engine.jito.wtf";
+    // const blockEngineUrl = "tokyo.mainnet.block-engine.jito.wtf";
     // console.log("BLOCK_ENGINE_URL:", blockEngineUrl);
     // // const bundleTransactionLimit = BUNDLE_TRANSACTION_LIMIT;
     // const c = searcherClient(blockEngineUrl);

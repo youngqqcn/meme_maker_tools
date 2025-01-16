@@ -11,7 +11,8 @@ export async function sendTxUsingJito(
     versionedTx: web3.VersionedTransaction | web3.Transaction
 ) {
     let rpcEndpoint =
-        "https://mainnet.block-engine.jito.wtf/api/v1/transactions";
+        // "https://mainnet.block-engine.jito.wtf/api/v1/transactions";
+        "https://tokyo.mainnet.block-engine.jito.wtf/api/v1/transactions";
 
     const serializedTx = versionedTx.serialize();
     let encodedTx = bs58.encode(serializedTx);

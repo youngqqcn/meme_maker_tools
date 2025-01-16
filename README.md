@@ -18,6 +18,8 @@
 |11|[批量关闭账户回收租金](./src/spl_token_close_account/)| 100%| TypeScript|
 |12|[销毁token](./src/burn_spl_token/)| 100%| TypeScript|
 |13|[Token持仓分析](./src/get_token_holders/) | 100% | TypeScript|
+|14|[Raydium新池子狙击工具](./src/trade_on_raydium/sniper) | 100% | TypeScript|
+
 
 
 # 运行

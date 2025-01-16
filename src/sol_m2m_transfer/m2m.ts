@@ -25,7 +25,8 @@ interface CsvRecord {
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+        "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -38,8 +39,7 @@ interface CsvRecord {
     let m2mDatas: CsvRecord[] = await parseCsvFile<CsvRecord>("./m2m.csv");
     console.log("datas长度", m2mDatas.length);
 
-
-    m2mDatas = m2mDatas.slice(0 ) // 截取
+    m2mDatas = m2mDatas.slice(0); // 截取
     for (let data of m2mDatas) {
         console.log("===============");
         let from = Keypair.fromSecretKey(
@@ -73,8 +73,11 @@ interface CsvRecord {
         }
 
         //休眠分钟
-        // let sleep_ms = 1000 * 60 * 1;
-        // console.log("开始休眠", sleep_ms, " ms");
-        // await sleep(sleep_ms); //
+
+        let sleep_ms = (10 + (Math.random() * 10)%5) * 60 * 1000;
+        // let sleep_ms = 1 * 60 * 1000;
+
+        console.log("开始休眠", sleep_ms, " ms");
+        await sleep(sleep_ms); //
     }
 })();

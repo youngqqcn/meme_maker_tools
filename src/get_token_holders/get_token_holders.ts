@@ -57,7 +57,7 @@ async function getTokenHolders() {
         return {
             holderAddress,
             ownerAddress: ownerAddress.toBase58(),
-            balance: Number(balance),
+            balance: Number(balance) / 10 ** 6,
         };
     });
 
@@ -90,20 +90,62 @@ async function getTokenHolders() {
         console.log("===========外部地址=========");
         let extAmountTokenSum = 0;
         let extAddrCount = 0;
+        let totalHolders = 0;
+        let innertTokenSum = 0;
+        let poolTokenSum = 0;
+
+        let extAddrs = [];
         for (let [k, v] of holders) {
-            if (!innerAddrMap.has(k)) {
-                console.log(v);
-                extAmountTokenSum += v["balance"];
-                extAddrCount += 1;
+            if (v["balance"] > 0) {
+                if (k == "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1") {
+                    // 池子
+                    poolTokenSum += v["balance"];
+                    continue;
+                }
+
+                totalHolders += 1;
+                if (!innerAddrMap.has(k)) {
+                    // console.log(k, v["balance"]);
+                    extAddrs.push(v);
+                    extAmountTokenSum += v["balance"];
+                    extAddrCount += 1;
+                } else {
+                    innertTokenSum += v["balance"];
+                }
             }
         }
-        console.log("==========================")
-        console.log("总共持仓地址: ", holders.size);
-        console.log("外部持仓地址数: ", extAddrCount);
-        console.log("外部总token数: ", extAmountTokenSum / 10 ** 6);
+
+        extAddrs.sort((a: any, b: any) => b["balance"] - a["balance"]); // 倒序排序，大的在前
+        console.log("地址".padStart(35), "token数量".padStart(15), "占比(%)".padStart(12));
+        extAddrs.forEach((a: any) =>
+            console.log(String(a["ownerAddress"]).padStart(45), Number(a["balance"]).toFixed(2).toString().padEnd(15), (Number(a["balance"])/10_0000_0000).toFixed(8).toString() + '%')
+        );
+
+        console.log("==========================");
+        console.log("总有效持仓地址数: ", totalHolders);
+        console.log("====");
+        console.log("  Raydium池子Token数:", poolTokenSum.toFixed(2));
         console.log(
-            "外部总token占比: ",
-            ((extAmountTokenSum / (10_0000_0000 * 10 ** 6)) * 100).toFixed(3),
+            "  Raydium池子Token占比:",
+            ((poolTokenSum / 10_0000_0000) * 100).toFixed(3),
+            "%"
+        );
+
+        console.log("=====");
+        console.log("  内部持仓地址:", totalHolders - extAddrCount);
+        console.log("  内部持仓token数:", innertTokenSum.toFixed(2));
+        console.log(
+            "  内部持仓token占比: ",
+            ((innertTokenSum / 10_0000_0000) * 100).toFixed(3),
+            "%"
+        );
+        console.log("===");
+
+        console.log("  外部持仓地址数: ", extAddrCount);
+        console.log("  外部总token数: ", extAmountTokenSum.toFixed(2));
+        console.log(
+            "  外部总token占比: ",
+            ((extAmountTokenSum / 10_0000_0000) * 100).toFixed(3),
             "%"
         );
     } catch (e) {
