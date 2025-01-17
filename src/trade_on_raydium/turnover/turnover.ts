@@ -63,17 +63,16 @@ interface CsvRecord {
                 new PublicKey(mint)
             );
 
-            let balance = calcDecimalValue(Number(rawBalance), 6);
-            console.log("balance: ", Number(balance));
-            if (balance < BigInt(101)) {
-                console.log("token余额不足100");
-                continue;
-            }
-
-            // let turnOverAmount = balance * 0.01; // 卖出1%
             let turnOverAmount = getRandomInRange(10000, 20000);
+
             // 先卖出，再买入
-            if (true) {
+            let balance = calcDecimalValue(Number(rawBalance), 6);
+            if (balance > turnOverAmount) {
+                console.log("balance: ", Number(balance));
+                // if (balance < BigInt(101)) {
+                //     console.log("token余额不足100");
+                //     continue;
+                // }
                 // 卖出
                 console.log("====卖出数量:", turnOverAmount);
                 let ret = await swap(connection, from, {
