@@ -82,7 +82,7 @@ interface CsvRecord {
                         amountSide: "send",
                         amount: turnOverAmount,
                         slippage: getSlippage(10),
-                    });
+                    }, 500_000, 0.00001);
                     if (ret.Err) {
                         console.error(ret.Err);
                     } else {
@@ -104,7 +104,7 @@ interface CsvRecord {
                         amountSide: "receive",
                         amount: Number(turnOverAmount),
                         slippage: getSlippage(5),
-                    });
+                    }, 500_000, 0.00001);
                     if (ret.Err) {
                         console.error(ret.Err);
                     } else {
