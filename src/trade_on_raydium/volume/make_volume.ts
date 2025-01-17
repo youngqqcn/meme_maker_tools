@@ -20,6 +20,8 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
 import { calcDecimalValue, getSlippage, sleep } from "../../base/utils";
 import { getExplorerLink } from "@solana-developers/helpers";
+import { getOpenBookMarketKeypair } from "../../base/getOpenBookMarketKeypair";
+import { Liquidity } from "@raydium-io/raydium-sdk";
 interface CsvRecord {
     key: string;
 }
@@ -45,11 +47,18 @@ interface CsvRecord {
     }
     console.log("datas长度", datas.length);
 
-    let poolId = new PublicKey("2yLEsHFPYZFzs2dmRXfFm4ujcLorDdnJSP34K1tQdDJ4");
+    let mint = "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9";
+    let marketId = await getOpenBookMarketKeypair(mint);
+    console.log("marketId: ", marketId.publicKey.toBase58());
+    let poolId = Liquidity.getAssociatedId({
+        marketId: marketId.publicKey,
+        programId: new PublicKey(
+            "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+        ), // mainnet
+    });
+    console.log("poolId: ", poolId.toBase58());
+
     let sleep_ms = 10_000; // 间隔时间(毫秒)
-
-    let mint = new PublicKey("F7S59s66o1Q1Meps2hAMRoRzQGMX9tPMzRYtGPaT1MQ6");
-
     while (true) {
         for (let data of datas) {
             await sleep(10);
@@ -86,7 +95,7 @@ interface CsvRecord {
                     let rawBalance = await getTokenBalance(
                         connection,
                         from.publicKey,
-                        mint
+                        new PublicKey(mint)
                     );
 
                     let balance = calcDecimalValue(Number(rawBalance), 6);

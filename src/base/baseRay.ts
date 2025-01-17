@@ -55,6 +55,7 @@ import {
     TOKEN_PROGRAM_ID,
     amountToUiAmount,
     createAssociatedTokenAccountInstruction,
+    createCloseAccountInstruction,
     createInitializeAccountInstruction,
     decodeAmountToUiAmountInstructionUnchecked,
     getAssociatedTokenAddressSync,
@@ -639,6 +640,7 @@ export class BaseRay {
         const inToken = (amountIn as TokenAmount).token.mint;
         // console.log("========amountIn: ", amountIn)
 
+        // 买入时需要将 SOL换成 WSOL
         if (inToken.toBase58() == NATIVE_MINT.toBase58()) {
             let lamports = BigInt(amountIn.raw.toNumber());
             const sendSolIx = web3.SystemProgram.transfer({
@@ -660,17 +662,27 @@ export class BaseRay {
             userKeys: { owner: user, tokenAccountIn, tokenAccountOut },
         }).innerTransaction;
 
+        let ixs = [...this.cacheIxs, ...rayIxs.instructions];
+
+        // 如果是卖出交易，需要关闭WSOL
+        if (inToken.toBase58() != NATIVE_MINT.toBase58()) {
+            console.log("需要关闭 WSOL");
+            const ata = getAssociatedTokenAddressSync(NATIVE_MINT, user);
+            const closeWsolIx = createCloseAccountInstruction(ata, user, user);
+            ixs = [...this.cacheIxs, ...rayIxs.instructions, closeWsolIx];
+        }
+
         const recentBlockhash = (await this.connection.getLatestBlockhash())
             .blockhash;
         const message = new web3.TransactionMessage({
-            instructions: [...this.cacheIxs, ...rayIxs.instructions],
+            instructions: ixs,
             payerKey: user,
             recentBlockhash,
         }).compileToV0Message();
         const mainTx = new web3.VersionedTransaction(message);
         if (rayIxs.signers) mainTx.signatures.push(...rayIxs.signers);
         return {
-            ixs: [...this.cacheIxs, ...rayIxs.instructions],
+            ixs: ixs,
             signers: [...rayIxs.signers],
         };
     }
@@ -1235,6 +1247,7 @@ export class BaseRay {
             if (buyToken == "base") {
                 amountOut = new TokenAmount(baseR, amount.toString(), false);
                 // amountIn = Liquidity.computeAmountIn({ amountOut, currencyIn: quoteR, poolInfo, poolKeys, slippage }).amountIn
+                console.log("slippage: ", slippage.toFixed());
                 amountIn = Liquidity.computeAmountIn({
                     amountOut,
                     currencyIn: quoteR,
@@ -1242,6 +1255,8 @@ export class BaseRay {
                     poolKeys,
                     slippage,
                 }).maxAmountIn as TokenAmount;
+                console.log("amountOut: ", amountOut.toExact());
+                console.log("amountIn: ", amountIn.toExact());
             } else {
                 amountOut = new TokenAmount(quoteR, amount.toString(), false);
                 // amountIn = Liquidity.computeAmountIn({ amountOut, currencyIn: baseR, poolInfo, poolKeys, slippage }).amountIn

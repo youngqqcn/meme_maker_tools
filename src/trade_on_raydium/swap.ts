@@ -49,8 +49,8 @@ export async function swap(
     connection: Connection,
     payer: Keypair,
     input: SwapInput,
-    unitPrice: number = 10_000_000, // 10 lamport per unit
-    jitoTip: number = 0.001
+    unitPrice: number = 1_000_000, // 10 lamport per unit
+    jitoTip: number = 0.0001
 ): Promise<Result<{ txSignature: string }, string>> {
     if (input.sellToken) {
         if (input.sellToken == "base") {
@@ -130,6 +130,7 @@ export async function swap(
     });
 
     console.log("txInfo.ixs长度: ", txInfo.ixs.length);
+    console.log("ixs: ", txInfo.ixs);
 
     const txMsg = new web3.TransactionMessage({
         instructions: [updateCuIx, jitoTipIx, ...txInfo.ixs],
@@ -141,7 +142,8 @@ export async function swap(
     tx.sign([payer, ...txInfo.signers]);
 
     let rsp = await sendTxUsingJito(tx);
-    console.log("rsp: ", rsp);
+    // let rsp = {"result":""};
+    // console.log("rsp: ", rsp);
 
     return {
         Ok: {

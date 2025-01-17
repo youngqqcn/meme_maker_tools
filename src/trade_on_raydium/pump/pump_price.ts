@@ -16,6 +16,7 @@ import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
 import { getSlippage, sleep } from "../../base/utils";
 import { Liquidity } from "@raydium-io/raydium-sdk";
+import { getOpenBookMarketKeypair } from "../../base/getOpenBookMarketKeypair";
 interface CsvRecord {
     key: string;
 }
@@ -43,15 +44,17 @@ interface CsvRecord {
     }
     console.log("datas长度", datas.length);
 
-    let sleep_ms = 10_000; // 间隔时间(毫秒)
+    let sleep_ms = 60_000; // 间隔时间(毫秒)
 
-    let poolId = new PublicKey("21WUaeHRDVnCDaC3ZPh8veJ3TiAxdV1rWJ6nZeqvAAwo");
-    // let poolId = Liquidity.getAssociatedId({
-    //     marketId: new PublicKey("5cZNpyTv3maQyHMaRPsbuRg8zupsW6N7jn94XjYr5ypr"),
-    //     programId: new PublicKey(
-    //         "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
-    //     ), // mainnet
-    // });
+    let mint = "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9";
+    let marketId = await getOpenBookMarketKeypair(mint);
+    console.log("marketId: ", marketId.publicKey.toBase58());
+    let poolId = Liquidity.getAssociatedId({
+        marketId: marketId.publicKey,
+        programId: new PublicKey(
+            "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+        ), // mainnet
+    });
     console.log("poolId: ", poolId.toBase58());
 
     while (true) {
@@ -65,32 +68,44 @@ interface CsvRecord {
             console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
             // let amount = Math.round(getRandomInRange(1000, 5000));
-            let amount = 0.1; // 按照SOL数量购买
+            let amount = 0.1 + ((Math.random() * 100) % 20) / 1000; // 按照SOL数量购买
 
             console.log("买入数量: ", amount);
 
             // 买入
             try {
                 // 特别注意： 要注意却分base 和 quote , 使用自己工具建的池子，base是token, quote是SOL
-                // let ret = await swap(connection, from, {
-                //     poolId: poolId,
-                //     buyToken: "base", // 买入 Token
-                //     sellToken: "quote",
-                //     amountSide: "receive",
-                //     amount: amount,
-                //     slippage: getSlippage(10),
-                // });
+                let ret = await swap(
+                    connection,
+                    from,
+                    {
+                        poolId: poolId,
+                        buyToken: "base", // 买入 Token
+                        sellToken: "quote",
+                        amountSide: "send",
+                        amount: amount,
+                        slippage: getSlippage(10),
+                    },
+                    5_000_000,
+                    0.0001
+                );
 
                 // 特别注意： 从pump.fun发出来的token, 其quote是token, 其base是SOL
                 // 按照 SOL 数量购买
-                let ret = await swap(connection, from, {
-                    poolId: poolId,
-                    buyToken: "quote", //"base",
-                    sellToken: "base", //"quote",
-                    amountSide: "send",
-                    amount: amount,
-                    slippage: getSlippage(15),
-                });
+                // let ret = await swap(
+                //     connection,
+                //     from,
+                //     {
+                //         poolId: poolId,
+                //         buyToken: "quote", //"base",
+                //         sellToken: "base", //"quote",
+                //         amountSide: "send",
+                //         amount: amount,
+                //         slippage: getSlippage(15),
+                //     },
+                //     5_000_000,
+                //     0.0001
+                // );
 
                 if (ret.Err) {
                     console.error(ret.Err);

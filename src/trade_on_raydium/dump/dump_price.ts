@@ -52,7 +52,7 @@ interface CsvRecord {
         try {
             for (let data of datas) {
                 console.log("===============");
-                console.log(data.key);
+                console.log("Key: ", data.key);
 
                 let from = Keypair.fromSecretKey(
                     Uint8Array.from(bs58.decode(data.key.trim()))
