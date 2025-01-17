@@ -19,6 +19,7 @@
 |12|[销毁token](./src/burn_spl_token/)| 100%| TypeScript|
 |13|[Token持仓分析](./src/get_token_holders/) | 100% | TypeScript|
 |14|[Raydium新池子狙击工具](./src/trade_on_raydium/sniper) | 100% | TypeScript|
+|15|[原地换手(刷数据)](./src/turnover/) | 100% | TypeScript|
 
 
 
