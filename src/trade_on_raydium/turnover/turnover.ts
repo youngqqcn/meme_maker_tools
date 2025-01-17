@@ -57,14 +57,13 @@ interface CsvRecord {
             );
             console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
+            let turnOverAmount = getRandomInRange(10000, 20000);
             try {
                 let rawBalance = await getTokenBalance(
                     connection,
                     from.publicKey,
                     new PublicKey(mint)
                 );
-
-                let turnOverAmount = getRandomInRange(10000, 20000);
 
                 // 先卖出，再买入
                 let balance = calcDecimalValue(Number(rawBalance), 6);
@@ -90,7 +89,12 @@ interface CsvRecord {
                         console.log("sig:", ret.Ok?.txSignature);
                     }
                 }
+            } catch (e) {
+                console.log("error: ", e);
+            }
 
+            // 买入
+            try {
                 if (turnOverAmount > 0) {
                     console.log("===买入数量: ", turnOverAmount);
                     let ret = await swap(connection, from, {
