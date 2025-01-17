@@ -111,11 +111,11 @@ interface CsvRecord {
                         console.log("sig:", ret.Ok?.txSignature);
                     }
                 }
+                await sleep(sleep_ms);
             } catch (e) {
                 console.error("交易失败:", e);
             }
 
-            await sleep(sleep_ms);
         }
     }
 })();
