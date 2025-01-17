@@ -13,7 +13,7 @@ const log = console.log;
 interface CsvRecord {
     fromkey: string;
     mint: string;
-    amount: number;
+    amount: Number;
 }
 
 export async function burnToken(
@@ -142,7 +142,7 @@ export async function burnToken(
         // let payer = Keypair.fromSecretKey(
         //     Uint8Array.from(bs58.decode(data.payer.trim()))
         // );
-        await burnToken(connection, mint, owner, data.amount);
+        await burnToken(connection, mint, owner, Number(data.amount));
     }
 })().catch((x) => {
     console.log(x);

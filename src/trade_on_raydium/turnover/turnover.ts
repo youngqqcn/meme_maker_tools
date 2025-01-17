@@ -47,79 +47,70 @@ interface CsvRecord {
     console.log("poolId: ", poolId.toBase58());
 
     let sleep_ms = 60_000; // 间隔时间(毫秒)
-    while (true) {
-        for (let data of datas) {
-            console.log("===============");
-            console.log(data.key);
+    for (let data of datas) {
+        console.log("===============");
+        console.log(data.key);
 
-            let from = Keypair.fromSecretKey(
-                Uint8Array.from(bs58.decode(data.key.trim()))
+        let from = Keypair.fromSecretKey(
+            Uint8Array.from(bs58.decode(data.key.trim()))
+        );
+        console.log(`当前处理: ${from.publicKey.toBase58()} `);
+
+        try {
+            let rawBalance = await getTokenBalance(
+                connection,
+                from.publicKey,
+                new PublicKey(mint)
             );
-            console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
-            try {
-                let rawBalance = await getTokenBalance(
-                    connection,
-                    from.publicKey,
-                    new PublicKey(mint)
-                );
-
-                let balance = calcDecimalValue(Number(rawBalance), 6);
-                console.log("balance: ", Number(balance));
-                if (balance < BigInt(101)) {
-                    console.log("token余额不足100");
-                    continue;
-                }
-
-                // let turnOverAmount = balance * 0.01; // 卖出1%
-                let turnOverAmount = 200000.0133;
-
-                // 先卖出，再买入
-                // if (true) {
-                //     // 卖出
-                // console.log("====卖出数量:", turnOverAmount);
-                //     let ret = await swap(connection, from, {
-                //         poolId: poolId,
-                //         buyToken: "quote",
-                //         sellToken: "base",
-                //         amountSide: "send",
-                //         amount: turnOverAmount,
-                //         slippage: getSlippage(10),
-                //     });
-                //     if (ret.Err) {
-                //         console.error(ret.Err);
-                //     } else {
-                //         console.log("sig:", ret.Ok?.txSignature);
-                //     }
-                // }
-
-                if (turnOverAmount > 0) {
-                    console.log("===买入数量: ", turnOverAmount);
-                    let ret = await swap(
-                        connection,
-                        from,
-                        {
-                            poolId: poolId,
-                            buyToken: "base", // 买入 Token
-                            sellToken: "quote",
-                            amountSide: "receive",
-                            amount: Number(turnOverAmount),
-                            slippage: getSlippage(5),
-                        },
-                        5_000_000,
-                        0.0001
-                    );
-                    if (ret.Err) {
-                        console.error(ret.Err);
-                    } else {
-                        console.log("sig:", ret.Ok?.txSignature);
-                    }
-                }
-            } catch (e) {
-                console.error("交易失败:", e);
+            let balance = calcDecimalValue(Number(rawBalance), 6);
+            console.log("balance: ", Number(balance));
+            if (balance < BigInt(101)) {
+                console.log("token余额不足100");
+                continue;
             }
 
-            await sleep(sleep_ms);
+            // let turnOverAmount = balance * 0.01; // 卖出1%
+            let turnOverAmount = getRandomInRange(10000, 20000);
+            // 先卖出，再买入
+            if (true) {
+                // 卖出
+                console.log("====卖出数量:", turnOverAmount);
+                let ret = await swap(connection, from, {
+                    poolId: poolId,
+                    buyToken: "quote",
+                    sellToken: "base",
+                    amountSide: "send",
+                    amount: turnOverAmount,
+                    slippage: getSlippage(10),
+                });
+                if (ret.Err) {
+                    console.error(ret.Err);
+                } else {
+                    console.log("sig:", ret.Ok?.txSignature);
+                }
+            }
+
+            if (turnOverAmount > 0) {
+                console.log("===买入数量: ", turnOverAmount);
+                let ret = await swap(connection, from, {
+                    poolId: poolId,
+                    buyToken: "base", // 买入 Token
+                    sellToken: "quote",
+                    amountSide: "receive",
+                    amount: Number(turnOverAmount),
+                    slippage: getSlippage(5),
+                });
+                if (ret.Err) {
+                    console.error(ret.Err);
+                } else {
+                    console.log("sig:", ret.Ok?.txSignature);
+                }
+            }
+        } catch (e) {
+            console.error("交易失败:", e);
         }
+
+        await sleep(sleep_ms);
     }
 })();

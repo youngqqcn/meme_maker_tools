@@ -130,7 +130,7 @@ export async function swap(
     });
 
     console.log("txInfo.ixs长度: ", txInfo.ixs.length);
-    console.log("ixs: ", txInfo.ixs);
+    // console.log("ixs: ", txInfo.ixs);
 
     const txMsg = new web3.TransactionMessage({
         instructions: [updateCuIx, jitoTipIx, ...txInfo.ixs],

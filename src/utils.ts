@@ -64,11 +64,10 @@ export const getRandomElement = <T>(list: T[]): T | undefined => {
     return list[randomIndex];
 };
 
-export const getRandomElementX = <T>(list: T[]): T  => {
+export const getRandomElementX = <T>(list: T[]): T => {
     const randomIndex = Math.floor(Math.random() * list.length);
     return list[randomIndex];
 };
-
 
 export async function sol_transfer(
     connection: Connection,
@@ -111,7 +110,6 @@ export async function sol_transfer(
     console.log("signature: ", signature.toString());
 }
 
-
 /**
  * 生成指定范围内的随机数
  * @param min 最小值（包含）
@@ -119,5 +117,5 @@ export async function sol_transfer(
  * @returns 范围内的随机数
  */
 export function getRandomInRange(min: number, max: number): number {
-    return Math.random() * (max - min) + min;
+    return Math.random() * (max - min + 1) + min;
 }

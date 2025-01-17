@@ -20,7 +20,7 @@ import { parseCsvFile, sleep, sol_transfer } from "../utils";
 interface CsvRecord {
     fromkey: string;
     address: string;
-    amount: number;
+    amount: Number;
 }
 
 (async () => {
@@ -52,7 +52,7 @@ interface CsvRecord {
         );
 
         // 如果amount是负数, 则全部归集
-        if (data.amount <= -1) {
+        if (Number(data.amount) <= -1) {
             let balance = await connection.getBalance(from.publicKey);
             if (balance < 5000) {
                 console.log(from.publicKey.toBase58(), "余额太小, 跳过 ");
@@ -68,16 +68,16 @@ interface CsvRecord {
                 connection,
                 from,
                 new PublicKey(data.address.trim()),
-                data.amount * LAMPORTS_PER_SOL
+                Number(data.amount) * LAMPORTS_PER_SOL
             );
         }
 
         //休眠分钟
 
-        let sleep_ms = (10 + (Math.random() * 10)%5) * 60 * 1000;
+        let sleep_ms = (10 + ((Math.random() * 10) % 5)) * 60 * 1000;
         // let sleep_ms = 1 * 60 * 1000;
 
         console.log("开始休眠", sleep_ms, " ms");
-        await sleep(sleep_ms); //
+        // await sleep(sleep_ms); //
     }
 })();

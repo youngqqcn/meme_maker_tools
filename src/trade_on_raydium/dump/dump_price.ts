@@ -15,7 +15,8 @@ interface CsvRecord {
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+        "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -69,7 +70,7 @@ interface CsvRecord {
                     continue;
                 }
 
-                let amount = getRandomInRange(20000, 30000);
+                let amount = getRandomInRange(10000, 15000);
                 if (amount > balance) {
                     amount = Number(balance);
                 }
@@ -78,14 +79,20 @@ interface CsvRecord {
 
                 // 卖出token
                 try {
-                    let ret = await swap(connection, from, {
-                        poolId: poolId,
-                        buyToken: "quote",
-                        sellToken: "base",
-                        amountSide: "send",
-                        amount: amount,
-                        slippage: getSlippage(10),
-                    }, 1_000_000, 0.0001);
+                    let ret = await swap(
+                        connection,
+                        from,
+                        {
+                            poolId: poolId,
+                            buyToken: "quote",
+                            sellToken: "base",
+                            amountSide: "send",
+                            amount: amount,
+                            slippage: getSlippage(10),
+                        },
+                        1_000_000,
+                        0.0001
+                    );
 
                     // 特别注意： 从pump.fun发出来的token, 其quote是token, 其base是SOL
                     // let ret = await swap(connection, from, {

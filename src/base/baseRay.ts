@@ -666,7 +666,7 @@ export class BaseRay {
 
         // 如果是卖出交易，需要关闭WSOL
         if (inToken.toBase58() != NATIVE_MINT.toBase58()) {
-            console.log("需要关闭 WSOL");
+            // console.log("需要关闭 WSOL");
             const ata = getAssociatedTokenAddressSync(NATIVE_MINT, user);
             const closeWsolIx = createCloseAccountInstruction(ata, user, user);
             ixs = [...this.cacheIxs, ...rayIxs.instructions, closeWsolIx];
