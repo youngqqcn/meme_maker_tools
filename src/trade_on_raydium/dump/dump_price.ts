@@ -47,7 +47,7 @@ interface CsvRecord {
     });
     console.log("poolId: ", poolId.toBase58());
 
-    let sleep_ms = 10*60_000; // 间隔时间(毫秒)
+    let sleep_ms = 20*60_000; // 间隔时间(毫秒)
 
     while (true) {
         try {

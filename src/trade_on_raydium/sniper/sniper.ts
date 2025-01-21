@@ -100,7 +100,7 @@ interface CsvRecord {
 
                     // 7-3开：  7成作为 priority fee,  3成作为 jito费
                     // https://docs.jito.wtf/lowlatencytxnsend/#tip-amount
-                    350_000_000, // Compute Price ,  200000 * 350 / 10**9 = 0.07
+                    35_000_000, // Compute Price ,  200000 * 350 / 10**9 = 0.07
                     0.03 // jito费用
                 );
 

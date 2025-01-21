@@ -32,9 +32,9 @@ interface CsvRecord {
     console.log("xx");
 
     const RPC_ENDPOINT_MAIN =
-        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
-        // "https://mainnet.helius-rpc.com/?api-key=29acd0dc-e336-4909-873a-0ed1010a9de2";
-        "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
+        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+    // "https://mainnet.helius-rpc.com/?api-key=29acd0dc-e336-4909-873a-0ed1010a9de2";
+    // "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
@@ -46,6 +46,8 @@ interface CsvRecord {
 
     let m2mDatas: CsvRecord[] = await parseCsvFile<CsvRecord>("./m2m.csv");
     console.log("datas长度", m2mDatas.length);
+
+    m2mDatas = m2mDatas.reverse();
 
     let failedList: CsvRecord[] = m2mDatas;
     while (true) {
@@ -98,11 +100,15 @@ interface CsvRecord {
                 let dest = new PublicKey(data.address);
 
                 // 更新计算单元价格
+                const updateCULimit =
+                    web3.ComputeBudgetProgram.setComputeUnitLimit({
+                        units: 30000,
+                    });
                 const updateCuIx =
                     web3.ComputeBudgetProgram.setComputeUnitPrice({
                         microLamports: 500_000,
                     });
-                tx.add(updateCuIx);
+                tx.add(...[updateCULimit, updateCuIx]);
 
                 let srcATA = getAssociatedTokenAddressSync(
                     mint,
@@ -126,7 +132,7 @@ interface CsvRecord {
 
                 if (Number(data.amount) > 0 && ataInfo) {
                     let balance = await getTokenBalance(connection, dest, mint);
-                    if (balance > BigInt(380000 * 10 ** 6)) {
+                    if (balance > BigInt(25375 * 10 ** 6)) {
                         console.log("已经有余额，跳过");
                         continue;
                     }

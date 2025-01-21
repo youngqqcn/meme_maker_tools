@@ -59,6 +59,14 @@ export async function swap(
             input.buyToken = "base";
         }
     }
+
+    let unitLimit = 8_0000;
+    if (input.buyToken == "base") {
+        // 买入
+        unitLimit = 8_0000;
+    } else {
+        unitLimit = 6_0000;
+    }
     // console.log("swap: ", input);
 
     const baseRay = new BaseRay({ rpcEndpointUrl: connection.rpcEndpoint });
@@ -108,7 +116,10 @@ export async function swap(
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
     // 更新计算单元价格
-    const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
+    const updateCULimit = web3.ComputeBudgetProgram.setComputeUnitLimit({
+        units: unitLimit,
+    });
+    const updateCUPriceIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: unitPrice,
     });
 
@@ -133,7 +144,12 @@ export async function swap(
     // console.log("ixs: ", txInfo.ixs);
 
     const txMsg = new web3.TransactionMessage({
-        instructions: [updateCuIx, jitoTipIx, ...txInfo.ixs],
+        instructions: [
+            updateCULimit,
+            updateCUPriceIx,
+            jitoTipIx,
+            ...txInfo.ixs,
+        ],
         // instructions: [updateCuIx, ...txInfo.ixs],
         payerKey: payer.publicKey,
         recentBlockhash,
