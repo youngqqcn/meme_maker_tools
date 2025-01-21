@@ -102,7 +102,7 @@ interface CsvRecord {
                 // 更新计算单元价格
                 const updateCULimit =
                     web3.ComputeBudgetProgram.setComputeUnitLimit({
-                        units: 30000,
+                        units: 32000,
                     });
                 const updateCuIx =
                     web3.ComputeBudgetProgram.setComputeUnitPrice({
