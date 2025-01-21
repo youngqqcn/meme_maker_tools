@@ -15,8 +15,8 @@ interface CsvRecord {
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
-        "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
+        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+        // "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -47,7 +47,7 @@ interface CsvRecord {
     });
     console.log("poolId: ", poolId.toBase58());
 
-    let sleep_ms = 60_000; // 间隔时间(毫秒)
+    let sleep_ms = 10*60_000; // 间隔时间(毫秒)
 
     while (true) {
         try {
@@ -70,7 +70,7 @@ interface CsvRecord {
                     continue;
                 }
 
-                let amount = getRandomInRange(10000, 15000);
+                let amount = getRandomInRange(100000, 150000);
                 if (amount > balance) {
                     amount = Number(balance);
                 }

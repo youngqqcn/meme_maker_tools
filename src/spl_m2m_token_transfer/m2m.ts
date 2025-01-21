@@ -47,15 +47,13 @@ interface CsvRecord {
     let m2mDatas: CsvRecord[] = await parseCsvFile<CsvRecord>("./m2m.csv");
     console.log("datas长度", m2mDatas.length);
 
-    let dataList = m2mDatas;
-    let failedList: CsvRecord[] = [];
+    let failedList: CsvRecord[] = m2mDatas;
     while (true) {
-        if (failedList.length > 0) {
-            dataList = failedList;
+        let dataList = failedList;
 
-            // 清空
-            failedList = []
-        }
+        // 清空
+        failedList = [];
+
         if (dataList.length == 0) {
             console.log("所有数据处理完成");
             break;
@@ -88,7 +86,7 @@ interface CsvRecord {
                     console.log("data.amount: ", data.amount);
                     console.log("data.decimals", data.decimals);
                     amount = Math.floor(
-                        (amount + getRandomInRange(1, 10000)) *
+                        (amount + getRandomInRange(500, 1000)) *
                             Math.pow(10, Number(data.decimals))
                     );
                     console.log("amount = ", amount);
@@ -128,7 +126,7 @@ interface CsvRecord {
 
                 if (Number(data.amount) > 0 && ataInfo) {
                     let balance = await getTokenBalance(connection, dest, mint);
-                    if (balance > BigInt(160680 * 10 ** 6)) {
+                    if (balance > BigInt(380000 * 10 ** 6)) {
                         console.log("已经有余额，跳过");
                         continue;
                     }
@@ -163,7 +161,7 @@ interface CsvRecord {
                 console.log("error:", e);
 
                 // 插入到失败列表，稍后继续重试
-                failedList.push(data)
+                failedList.push(data);
             }
         }
     }
