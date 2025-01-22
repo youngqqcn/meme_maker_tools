@@ -102,15 +102,11 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
         new PublicKey(m2mDatas[0].mint)
     );
 
-    let baseAmount = 25375 ;
+    let baseAmount = Number(m2mDatas[0].amount);
     let filteredDatas: CsvRecord[] = [];
     m2mDatas.map((v: CsvRecord, i, x) => {
-        if (holders.has(v["address"])) {
-            let x = holders.get(v["address"]);
-            console.log(Number(x["balance"]))
-            if (Number(x["balance"]) < baseAmount) {
-                filteredDatas.push(v);
-            }
+        if (!holders.has(v["address"])) {
+            filteredDatas.push(v);
         }
     });
 
@@ -153,7 +149,7 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
                     console.log("data.amount: ", data.amount);
                     console.log("data.decimals", data.decimals);
                     amount = Math.floor(
-                        (amount + getRandomInRange(500, 1000)) *
+                        (amount + getRandomInRange(1, 100)) *
                             Math.pow(10, Number(data.decimals))
                     );
                     console.log("amount = ", amount);
@@ -167,7 +163,7 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
                 // 更新计算单元价格
                 const updateCULimit =
                     web3.ComputeBudgetProgram.setComputeUnitLimit({
-                        units: 50000,
+                        units: 40000,
                     });
                 const updateCuIx =
                     web3.ComputeBudgetProgram.setComputeUnitPrice({
@@ -197,7 +193,7 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
 
                 if (Number(data.amount) > 0 && ataInfo) {
                     let balance = await getTokenBalance(connection, dest, mint);
-                    if (balance > BigInt(baseAmount * 10**6)) {
+                    if (balance > BigInt(baseAmount * 10 ** 6)) {
                         console.log("已经有余额，跳过");
                         continue;
                     }

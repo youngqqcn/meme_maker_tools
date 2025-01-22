@@ -23,8 +23,8 @@ interface CsvRecord {
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
-        "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
+        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+    // "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -44,7 +44,7 @@ interface CsvRecord {
     }
     console.log("datas长度", datas.length);
 
-    let sleep_ms = 60_000; // 间隔时间(毫秒)
+    let sleep_ms = 10 * 60_000; // 间隔时间(毫秒)
 
     let mint = "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9";
     let marketId = await getOpenBookMarketKeypair(mint);
@@ -57,6 +57,8 @@ interface CsvRecord {
     });
     console.log("poolId: ", poolId.toBase58());
 
+    datas.reverse()
+
     while (true) {
         for (let data of datas) {
             console.log("===============");
@@ -68,7 +70,7 @@ interface CsvRecord {
             console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
             // let amount = Math.round(getRandomInRange(1000, 5000));
-            let amount = 0.1 + ((Math.random() * 100) % 20) / 1000; // 按照SOL数量购买
+            let amount = 0.05 + ((Math.random() * 100) % 20) / 1000; // 按照SOL数量购买
 
             console.log("买入数量: ", amount);
 
@@ -86,8 +88,8 @@ interface CsvRecord {
                         amount: amount,
                         slippage: getSlippage(10),
                     },
-                    5_000_000,
-                    0.0001
+                    500_000,
+                    0.00001
                 );
 
                 // 特别注意： 从pump.fun发出来的token, 其quote是token, 其base是SOL
@@ -103,8 +105,8 @@ interface CsvRecord {
                 //         amount: amount,
                 //         slippage: getSlippage(15),
                 //     },
-                //     5_000_000,
-                //     0.0001
+                //     500_000,
+                //     0.00001
                 // );
 
                 if (ret.Err) {

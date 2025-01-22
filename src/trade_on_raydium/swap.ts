@@ -49,8 +49,8 @@ export async function swap(
     connection: Connection,
     payer: Keypair,
     input: SwapInput,
-    unitPrice: number = 1_000_000, // 10 lamport per unit
-    jitoTip: number = 0.0001
+    unitPrice: number = 500_000, // 10 lamport per unit
+    jitoTip: number = 0.00001
 ): Promise<Result<{ txSignature: string }, string>> {
     if (input.sellToken) {
         if (input.sellToken == "base") {
