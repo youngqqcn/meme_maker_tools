@@ -24,6 +24,14 @@ interface CsvRecord {
 }
 
 (async () => {
+    const args = process.argv.slice(2); // 去掉前两个默认元素
+    console.log("命令行参数:", args);
+    if (args.length == 0) {
+        console.log("请输入 csv文件路径");
+        return;
+    }
+    let dataFilePath = args[0];
+
     const RPC_ENDPOINT_MAIN =
         // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
         "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
@@ -36,7 +44,7 @@ interface CsvRecord {
         confirmTransactionInitialTimeout: 60000,
     });
 
-    let m2mDatas: CsvRecord[] = await parseCsvFile<CsvRecord>("./m2m.csv");
+    let m2mDatas: CsvRecord[] = await parseCsvFile<CsvRecord>(dataFilePath);
     console.log("datas长度", m2mDatas.length);
 
     m2mDatas = m2mDatas.slice(0); // 截取
@@ -74,10 +82,10 @@ interface CsvRecord {
 
         //休眠分钟
 
-        let sleep_ms = (10 + ((Math.random() * 10) % 5)) * 60 * 1000;
-        // let sleep_ms = 1 * 60 * 1000;
+        // let sleep_ms = (13 + ((Math.random() * 10) % 5)) * 60 * 1000;
+        let sleep_ms = 11.33 * 60 * 1000;
 
         console.log("开始休眠", sleep_ms, " ms");
-        // await sleep(sleep_ms); //
+        await sleep(sleep_ms); //
     }
 })();

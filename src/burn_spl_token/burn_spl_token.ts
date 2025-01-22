@@ -6,8 +6,10 @@ import {
     createBurnInstruction,
     createCloseAccountInstruction,
     getAssociatedTokenAddressSync,
+    NATIVE_MINT,
 } from "@solana/spl-token";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
+import { WSOL } from "@raydium-io/raydium-sdk";
 const log = console.log;
 
 interface CsvRecord {
@@ -29,6 +31,7 @@ export async function burnToken(
     let isClose = false;
     try {
         let balance = await getTokenBalance(connection, owner.publicKey, mint);
+        console.log("balance: ", balance);
         if (burnAmount > 0) {
             if (burnAmount > Number(balance)) {
                 console.log(
@@ -49,6 +52,8 @@ export async function burnToken(
             amount = Number(balance);
             isClose = true; // 全部销毁，关闭账户
         }
+    } catch (e) {
+        console.log("error: ", e);
     } finally {
         if (!amount) {
             console.log(
@@ -57,6 +62,8 @@ export async function burnToken(
             );
             return;
         }
+
+        // amount = 1;
     }
 
     const ixBurn = createBurnInstruction(ata, mint, owner.publicKey, amount, [
@@ -71,12 +78,15 @@ export async function burnToken(
     );
 
     // 加速 speedup
+    let updateCULimit = web3.ComputeBudgetProgram.setComputeUnitLimit({
+        units: 12000,
+    });
     const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_000_000, // 1 lamports
+        microLamports: 500_000, // 1 lamports
     });
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    let tx = new web3.Transaction().add(updateCuIx);
+    let tx = new web3.Transaction().add(updateCULimit, updateCuIx);
     if (Number(amount) > 0) {
         tx.add(ixBurn); // 销毁
     }
@@ -85,12 +95,11 @@ export async function burnToken(
     }
 
     // 如果是 Wrapped SOL ，不要销毁，只需Close, SOL会自动redeem为SOL
-    if (
-        mint.equals(
-            new PublicKey("So11111111111111111111111111111111111111112")
-        )
-    ) {
-        tx = new web3.Transaction().add(updateCuIx, ixClose);
+    if (mint.equals(NATIVE_MINT)) {
+        updateCULimit = web3.ComputeBudgetProgram.setComputeUnitLimit({
+            units: 5000,
+        });
+        tx = new web3.Transaction().add(updateCULimit, updateCuIx, ixClose);
     }
 
     // 省钱
@@ -126,7 +135,7 @@ export async function burnToken(
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 
-    const connection = new Connection(RPC_ENDPOINT_DEV, {
+    const connection = new Connection(RPC_ENDPOINT_MAIN, {
         commitment: "confirmed",
         confirmTransactionInitialTimeout: 60000,
     });

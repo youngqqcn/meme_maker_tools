@@ -111,6 +111,7 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
     });
 
     let failedList: CsvRecord[] = filteredDatas;
+    // let failedList: CsvRecord[] = m2mDatas;
     while (true) {
         let dataList = failedList;
 
@@ -163,7 +164,7 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
                 // 更新计算单元价格
                 const updateCULimit =
                     web3.ComputeBudgetProgram.setComputeUnitLimit({
-                        units: 40000,
+                        units: 35000,
                     });
                 const updateCuIx =
                     web3.ComputeBudgetProgram.setComputeUnitPrice({
