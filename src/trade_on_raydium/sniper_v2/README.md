@@ -37,14 +37,29 @@ Raydium狙击升级版
 
 
 
-- Geyser RPC:
-  - 
+- Geyser RPC: 服务商将数据实时解析到数据库中，这样，开发者查询历史数据时不需要查链上数据
 
 ## 参考代码
 
-- 监听账户更新[禁止直接使用代码，防止后门]: https://github.com/cutupdev/Solana-Raydium-Sniper-Bot/blob/main/start.ts#L458
-- 监听Raydium交易:  https://github.com/web3batman/Solana_Memecoin_Sniper_Bot/blob/main/solana-bot-BE/track/raydium/raydium.ts#L793
+- ⭐⭐⭐⭐⭐ 监听Raydium交易:  https://github.com/youngqqcn/Solana_Memecoin_Sniper_Bot
+- ⭐⭐⭐⭐ 监听Raydium交易:  https://github.com/danbayk/solana-spl-token-sniper/tree/master
+  - 预先计算Pool Keys:  https://github.com/danbayk/solana-spl-token-sniper/blob/master/strategy2/derivePoolKeys.js
+- ⭐⭐⭐ 监听: https://github.com/jwest951227/solana-raydium-pumpfun-sniper-Rust
+- ⭐⭐⭐Raydium/Pump.fun TG交易机器人: https://github.com/youngqqcn/gTradeBot
+- ⭐监听账户更新[禁止直接使用代码，防止后门]: https://github.com/cutupdev/Solana-Raydium-Sniper-Bot/blob/main/start.ts#L458
 
 
 
 
+## 整体架构
+
+
+- **Monitor**:  使用geyser rpc 监听并解析交易
+  - helius 的 geyser rpc
+  - yellowstone 的 geyser rpc
+
+- **Tx Maker**: 用于Raydium池子信息的获取和交易的构造
+
+- **Sender**: 用于交易发送
+  - jito: 发送交易，快速确认交易
+  - nextblock: 发送交易，快速确认交易

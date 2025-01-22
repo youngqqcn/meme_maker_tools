@@ -7,6 +7,7 @@ import {
     createCloseAccountInstruction,
     createTransferInstruction,
     getAssociatedTokenAddressSync,
+    TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
     Connection,
@@ -28,6 +29,52 @@ interface CsvRecord {
     decimals: Number;
 }
 
+async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
+    // 获取所有与目标Mint地址相关的账户
+    const accounts = await connection.getProgramAccounts(TOKEN_PROGRAM_ID, {
+        filters: [
+            {
+                dataSize: 165, // SPL Token账户的大小
+            },
+            {
+                memcmp: {
+                    offset: 0, // Token账户的第一部分是Mint地址
+                    bytes: mintAddress.toBase58(), // 与目标Mint地址匹配
+                },
+            },
+        ],
+    });
+    // console.log(accounts);
+
+    //账户数据结构： https://github.com/solana-program/token/blob/main/program/src/state.rs#L89-L110
+    const holders = accounts.map((account) => {
+        const accountInfo = account.account.data;
+        const tokenAmount = accountInfo.slice(64, 72); // 余额在Account的第64-72字节
+        const balance = tokenAmount.readBigInt64LE(0); // 转换为数量
+        const holderAddress = account.pubkey.toString();
+
+        // 获取持币者地址（ATA账户的所有者地址）
+        const ownerBuffer = accountInfo.slice(32, 64); //
+        const ownerAddress = new PublicKey(ownerBuffer);
+
+        return {
+            holderAddress,
+            ownerAddress: ownerAddress.toBase58(),
+            balance: Number(balance) / 10 ** 6,
+        };
+    });
+
+    // let holders = [""];
+    // console.log(holders);
+
+    const addresses = new Map();
+    for (let holder of holders) {
+        addresses.set(holder.ownerAddress, holder);
+    }
+
+    return addresses;
+}
+
 (async () => {
     console.log("xx");
 
@@ -47,9 +94,27 @@ interface CsvRecord {
     let m2mDatas: CsvRecord[] = await parseCsvFile<CsvRecord>("./m2m.csv");
     console.log("datas长度", m2mDatas.length);
 
-    m2mDatas = m2mDatas.reverse();
+    // m2mDatas = m2mDatas.reverse();
 
-    let failedList: CsvRecord[] = m2mDatas;
+    // 筛选出没有余额的账户
+    let holders = await getTokenHolders(
+        connection,
+        new PublicKey(m2mDatas[0].mint)
+    );
+
+    let baseAmount = 25375 ;
+    let filteredDatas: CsvRecord[] = [];
+    m2mDatas.map((v: CsvRecord, i, x) => {
+        if (holders.has(v["address"])) {
+            let x = holders.get(v["address"]);
+            console.log(Number(x["balance"]))
+            if (Number(x["balance"]) < baseAmount) {
+                filteredDatas.push(v);
+            }
+        }
+    });
+
+    let failedList: CsvRecord[] = filteredDatas;
     while (true) {
         let dataList = failedList;
 
@@ -102,7 +167,7 @@ interface CsvRecord {
                 // 更新计算单元价格
                 const updateCULimit =
                     web3.ComputeBudgetProgram.setComputeUnitLimit({
-                        units: 32000,
+                        units: 50000,
                     });
                 const updateCuIx =
                     web3.ComputeBudgetProgram.setComputeUnitPrice({
@@ -132,7 +197,7 @@ interface CsvRecord {
 
                 if (Number(data.amount) > 0 && ataInfo) {
                     let balance = await getTokenBalance(connection, dest, mint);
-                    if (balance > BigInt(25375 * 10 ** 6)) {
+                    if (balance > BigInt(baseAmount * 10**6)) {
                         console.log("已经有余额，跳过");
                         continue;
                     }
