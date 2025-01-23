@@ -2,8 +2,6 @@
 创建Raydium池子 + 捆绑买入
 */
 
-require("dotenv").config();
-
 import * as Fs from "fs";
 import { Keypair, Connection, PublicKey } from "@solana/web3.js";
 
@@ -15,27 +13,32 @@ import { getSlippage, sendAndConfirmTransactionEx } from "../base/utils";
 import { buildCreatePoolTransaction } from "./build_create_pool_tx";
 import { BaseRay } from "../base/baseRay";
 import { BN } from "@project-serum/anchor";
+import { Liquidity, MAINNET_PROGRAM_ID } from "@raydium-io/raydium-sdk";
+import { getOpenBookMarketKeypair } from "../base/getOpenBookMarketKeypair";
+
+require("dotenv").config();
 
 // 只能用主网来测试
 const RPC_URL =
-    "https://mainnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
+    "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 const BLOCK_ENGINE_URL = "mainnet.block-engine.jito.wtf";
-const BUNDLE_TRANSACTION_LIMIT = 5;
+const BUNDLE_TRANSACTION_LIMIT = 4;
 
 const main = async () => {
-    // let k = Keypair.generate()
-    // console.log(bs58.encode( k.secretKey))
-    // console.log(k.publicKey.toBase58())
-    // return
-
     const blockEngineUrl = BLOCK_ENGINE_URL;
     console.log("BLOCK_ENGINE_URL:", blockEngineUrl);
 
-    const keypair = Keypair.fromSecretKey(
-        bs58.decode(
-            "YOURKEY"
-        )
-    );
+    let createPoolKey = process.env.CREATE_POOL_KEY ?? ""; // 创建池子的私钥
+    let firstBuyerKey = process.env.FIRST_BUYER_KEY ?? ""; // 买入地址私钥
+    console.log("createPoolKey: ", createPoolKey);
+    console.log("firstBuyerKey: ", firstBuyerKey);
+
+    const createPoolKeypair = Keypair.fromSecretKey(bs58.decode(createPoolKey));
+    const buyerKeypair1 = Keypair.fromSecretKey(bs58.decode(firstBuyerKey));
+
+    if (createPoolKeypair) {
+        return;
+    }
 
     const bundleTransactionLimit = BUNDLE_TRANSACTION_LIMIT;
 
@@ -46,9 +49,6 @@ const main = async () => {
     console.log("RPC_URL:", RPC_URL);
     const conn = new Connection(RPC_URL, "confirmed");
 
-    // let txSig = await sendAndConfirmTransactionEx(tx1, conn);
-    // console.log("txSig", txSig);
-
     // 共用一个 BaseRay对象，以便来获得 PoolKeys
     const baseRay = new BaseRay({ rpcEndpointUrl: conn.rpcEndpoint });
 
@@ -57,20 +57,32 @@ const main = async () => {
     let quoteMintAmount = 0.01;
     let quoteDecimals = 9;
 
-    let { tx: tx1, txInfo: tx1Info } = await buildCreatePoolTransaction(
-        baseRay,
-        conn,
-        keypair,
-        {
-            marketId: new PublicKey(
-                "HVtvzpyYjZkccKn31tszPGv1XH36Uq2dLs84pjdYnU6q"
-            ),
-            baseMintAmount: baseMintAmount, // TODO
-            quoteMintAmount: quoteMintAmount, // TODO
-        }
-    );
+    let mint = ""; // TODO
+    let marketId = await getOpenBookMarketKeypair(mint);
+    console.log("marketId: ", marketId.publicKey.toBase58());
+    let poolId1 = Liquidity.getAssociatedId({
+        marketId: marketId.publicKey,
+        programId: new PublicKey(
+            MAINNET_PROGRAM_ID.AmmV4 // "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+        ),
+    });
+    console.log("poolId(预计算): ", poolId1.toBase58());
+
+    let { tx: createPoolTx, txInfo: tx1Info } =
+        await buildCreatePoolTransaction(baseRay, conn, createPoolKeypair, {
+            marketId: new PublicKey(marketId),
+            baseMintAmount: baseMintAmount,
+            quoteMintAmount: quoteMintAmount,
+        });
     let poolId = tx1Info.poolId;
-    console.log("poolId: ", poolId.toBase58());
+    console.log("poolId(生成): ", poolId.toBase58());
+
+    if (poolId.toBase58() != poolId1.toBase58()) {
+        console.log(
+            "计算的 poolId 和生成的 poolId 不匹配， 请检查marketId是否正确"
+        );
+        return;
+    }
 
     // https://github.com/raydium-io/raydium-amm/blob/master/program/src/processor.rs#L1144-L1153
     let lpSupply =
@@ -87,27 +99,31 @@ const main = async () => {
         quoteMintAmount * Math.pow(10, quoteDecimals)
     );
 
-    let tx2 = await buildSwapTransaction(
+    // 就用一个地址买入即可, 不必藏着掖着，光明磊落
+    let buyTx1 = await buildSwapTransaction(
         baseRay,
         conn,
-        keypair,
+        buyerKeypair1,
         {
             poolId: poolId,
             buyToken: "base", // 买入 Token
             sellToken: "quote",
             amountSide: "send",
-            amount: 0.1,
-            slippage: getSlippage(15),
+            amount: 110, // 110 SOL
+            slippage: getSlippage(10),
         },
         new BN(lpSupply),
         new BN(baseReserve),
         new BN(quoteReserve)
     );
 
-    const result = await sendBundles(c, bundleTransactionLimit, keypair, conn, [
-        tx1,
-        tx2,
-    ]);
+    const result = await sendBundles(
+        c,
+        bundleTransactionLimit,
+        createPoolKeypair,
+        conn,
+        [createPoolTx, buyTx1]
+    );
     if (!result.ok) {
         console.error("Failed to send bundles:", result.error);
         return;

@@ -27,6 +27,18 @@ export const sendBundles = async (
     conn: Connection,
     txs: VersionedTransaction[]
 ): Promise<Result<string[], SearcherClientError>> => {
+    if (bundleTransactionLimit > 4) {
+        console.log("bundleTransactionLimit 必须小于4");
+        return {
+            ok: false,
+            error: new SearcherClientError(
+                4,
+                "bundleTransactionLimit 必须小于等于4",
+                "bundleTransactionLimit 必须小于等于4"
+            ),
+        };
+    }
+
     try {
         const tipAccountResult = await c.getTipAccounts();
         if (!tipAccountResult.ok) {
@@ -53,22 +65,15 @@ export const sendBundles = async (
             await new Promise((r) => setTimeout(r, 500));
         }
 
-        const blockHash = await conn.getLatestBlockhash();
-        const b = new Bundle([], bundleTransactionLimit);
-
+        const blockHash = await conn.getLatestBlockhash("processed"); // 这里使用 processed
         console.log(blockHash.blockhash);
-
-        const bundles = [b];
-
+        const b = new Bundle([], bundleTransactionLimit);
         console.log("========$$$$$$$$===========$$$$$$$$$===========");
 
-        // 小费交易 必须在第一个， 否则失败
-        let maybeBundle = b.addTipTx(
-            keypair,
-            100_000,
-            tipAccount,
-            blockHash.blockhash
-        );
+        // 注意：这里的 bundles = [b] 中的  b是一个引用传递， 而不是值传递， 因此，后续b的更新会影响 bundles的内容
+        const bundles = [b];
+
+        let maybeBundle = b.addTransactions(...txs);
         if (isError(maybeBundle)) {
             return {
                 ok: false,
@@ -79,13 +84,20 @@ export const sendBundles = async (
                 ),
             };
         }
-        maybeBundle.addTransactions(...txs);
+
+        // 小费交易 必须在第一个， 否则失败
+        maybeBundle = b.addTipTx(
+            keypair,
+            0.001 * 10 ** 9,
+            tipAccount,
+            blockHash.blockhash
+        );
         if (isError(maybeBundle)) {
             return {
                 ok: false,
                 error: new SearcherClientError(
                     3, // INVALID_ARGUMENT
-                    "Failed to add tip transaction to bundle",
+                    "Failed to add jito tip tx to bundle",
                     maybeBundle.message
                 ),
             };

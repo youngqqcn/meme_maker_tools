@@ -8,7 +8,7 @@ import { swap } from "../swap";
 import { calcDecimalValue, getSlippage, sleep } from "../../base/utils";
 import { getExplorerLink } from "@solana-developers/helpers";
 import { getOpenBookMarketKeypair } from "../../base/getOpenBookMarketKeypair";
-import { Liquidity } from "@raydium-io/raydium-sdk";
+import { Liquidity, MAINNET_PROGRAM_ID } from "@raydium-io/raydium-sdk";
 interface CsvRecord {
     key: string;
 }
@@ -41,7 +41,7 @@ interface CsvRecord {
     let poolId = Liquidity.getAssociatedId({
         marketId: marketId.publicKey,
         programId: new PublicKey(
-            "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+            MAINNET_PROGRAM_ID.AmmV4 // "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
         ), // mainnet
     });
     console.log("poolId: ", poolId.toBase58());

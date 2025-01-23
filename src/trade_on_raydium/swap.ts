@@ -10,7 +10,6 @@ import {
     sleep,
 } from "../base/utils";
 import {
-    COMPUTE_UNIT_PRICE,
     getRaydiumAmmProgramId,
     RPC_ENDPOINT_DEV,
     RPC_ENDPOINT_MAIN,

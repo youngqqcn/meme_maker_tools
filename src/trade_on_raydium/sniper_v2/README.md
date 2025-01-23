@@ -44,6 +44,7 @@ Raydium狙击升级版
 - ⭐⭐⭐⭐⭐ 监听Raydium交易:  https://github.com/youngqqcn/Solana_Memecoin_Sniper_Bot
 - ⭐⭐⭐⭐ 监听Raydium交易:  https://github.com/danbayk/solana-spl-token-sniper/tree/master
   - 预先计算Pool Keys:  https://github.com/danbayk/solana-spl-token-sniper/blob/master/strategy2/derivePoolKeys.js
+- 使用 Jito Geyser监听： https://github.com/jito-labs/jito-ts/blob/8564ee1712ac101f74ab8dd45171cebf0ea54e4e/src/examples/geyser/index.ts
 - ⭐⭐⭐ 监听: https://github.com/jwest951227/solana-raydium-pumpfun-sniper-Rust
 - ⭐⭐⭐Raydium/Pump.fun TG交易机器人: https://github.com/youngqqcn/gTradeBot
 - ⭐监听账户更新[禁止直接使用代码，防止后门]: https://github.com/cutupdev/Solana-Raydium-Sniper-Bot/blob/main/start.ts#L458

@@ -147,8 +147,8 @@ export async function createMarket(
 
 (async () => {
     let rpc_url = "";
-    // let network = "mainnet";
-    let network = "devnet";
+    let network = "mainnet";
+    // let network = "devnet";
     if (network == "devnet") {
         rpc_url =
             "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -163,19 +163,16 @@ export async function createMarket(
         confirmTransactionInitialTimeout: 60000,
     });
 
-    // let mint = new PublicKey("7ADYSXcAagy5LnkiNnb4o4uu1t7vtBtyPsAvvWSQ4Huq");
-    let mint = new PublicKey("F7S59s66o1Q1Meps2hAMRoRzQGMX9tPMzRYtGPaT1MQ6");
-    let payer = Keypair.fromSecretKey(
-        bs58.decode(
-            "YOURKEY"
-        )
-    );
+    let mint = new PublicKey("");
+    let createMarketKey = process.env.CREATE_MARKET_KEY ?? "";
+    console.log("createMarketKey: ", createMarketKey);
+    let payer = Keypair.fromSecretKey(bs58.decode(createMarketKey));
 
     let ret = await createMarket(connection, payer, {
         baseMint: new PublicKey(mint),
         quoteMint: DEFAULT_TOKEN.WSOL.mint,
-        orderSize: 1,
-        priceTick: 0.000001,
+        orderSize: 10000,
+        priceTick: 0.0000000001,
     });
     console.log("ret", ret);
 })();

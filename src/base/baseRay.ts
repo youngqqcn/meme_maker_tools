@@ -189,7 +189,7 @@ export class BaseRay {
             // 老版本的 AMM ， 需要创建 OpenBook Market
             // https://docs.raydium.io/raydium/pool-creation/creating-a-constant-product-pool
             this.ammProgramId = new web3.PublicKey(
-                "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
+                MAINNET_PROGRAM_ID.AmmV4 // "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
             );
             this.orderBookProgramId = new web3.PublicKey(
                 "srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX"
