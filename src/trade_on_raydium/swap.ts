@@ -60,12 +60,12 @@ export async function swap(
     }
 
     // TODO: 是否有更好的方式？
-    let unitLimit = 8_3000;
+    let unitLimit = 8_5000;
     if (input.buyToken == "base") {
         // 买入
-        unitLimit = 8_3000;
+        unitLimit = 8_5000;
     } else {
-        unitLimit = 6_3000;
+        unitLimit = 6_5000;
     }
     // console.log("swap: ", input);
 
