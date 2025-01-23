@@ -2,7 +2,7 @@
 换手
 */
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { getRandomInRange, getTokenBalance, parseCsvFile } from "../../utils";
+import { getRandomInRange, getTokenBalance, parseCsvFile, shuffle } from "../../utils";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
 import { calcDecimalValue, getSlippage, sleep } from "../../base/utils";
@@ -48,6 +48,9 @@ interface CsvRecord {
 
     let sleep_ms = 60_000; // 间隔时间(毫秒)
     while (true) {
+        // 打乱顺序
+        datas = shuffle(datas);
+
         for (let data of datas) {
             console.log("===============");
             console.log(data.key);
