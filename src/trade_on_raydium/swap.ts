@@ -48,7 +48,7 @@ export async function swap(
     connection: Connection,
     payer: Keypair,
     input: SwapInput,
-    unitPrice: number = 500_000, // 10 lamport per unit
+    unitPrice: number = 100_000, // 10 lamport per unit
     jitoTip: number = 0.00001
 ): Promise<Result<{ txSignature: string }, string>> {
     if (input.sellToken) {
@@ -60,12 +60,12 @@ export async function swap(
     }
 
     // TODO: 是否有更好的方式？
-    let unitLimit = 8_5000;
+    let unitLimit = 90000;
     if (input.buyToken == "base") {
         // 买入
-        unitLimit = 8_5000;
+        unitLimit = 90000;
     } else {
-        unitLimit = 6_5000;
+        unitLimit = 70000;
     }
     // console.log("swap: ", input);
 

@@ -84,8 +84,8 @@ interface CsvRecord {
                         sellToken: "base",
                         amountSide: "send",
                         amount: turnOverAmount,
-                        slippage: getSlippage(10),
-                    }, 500_000, 0.00001);
+                        slippage: getSlippage(15),
+                    }, 100_000, 0.00001);
                     if (ret.Err) {
                         console.error(ret.Err);
                     } else {
@@ -106,8 +106,8 @@ interface CsvRecord {
                         sellToken: "quote",
                         amountSide: "receive",
                         amount: Number(turnOverAmount),
-                        slippage: getSlippage(5),
-                    }, 500_000, 0.00001);
+                        slippage: getSlippage(15),
+                    }, 100_000, 0.00001);
                     if (ret.Err) {
                         console.error(ret.Err);
                     } else {

@@ -87,9 +87,9 @@ interface CsvRecord {
                         sellToken: "quote",
                         amountSide: "send",
                         amount: amount,
-                        slippage: getSlippage(10),
+                        slippage: getSlippage(15),
                     },
-                    500_000,
+                    100_000,
                     0.00001
                 );
 
