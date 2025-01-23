@@ -10,6 +10,7 @@ import { COMPUTE_UNIT_PRICE } from "../base/baseMpl";
 import { sleep } from "../utils";
 import { sendAndConfirmTransaction } from "@solana/web3.js";
 import { DEFAULT_TOKEN } from "../base/config";
+import { getOpenBookMarketKeypair } from "../base/getOpenBookMarketKeypair";
 
 // 可以参考官方代码： https://github.com/sayantank/serum-explorer/blob/444659b4920fba4ce16d3bdd2649e593f04ffe5f/pages/market/create/advanced.tsx#L19
 
@@ -41,8 +42,8 @@ export async function createMarket(
     });
 
     // 生成确定 market keypair , 这样， raydium poolId 也是确定的
-    // const marketKeypair = await getOpenBookMarketKeypair(quoteMint.toBase58());
-    let marketKeypair = Keypair.generate();
+    const marketKeypair = await getOpenBookMarketKeypair(baseMint.toBase58());
+    // let marketKeypair = Keypair.generate();
 
     const baseRay = new BaseRay({ rpcEndpointUrl: connection.rpcEndpoint });
     const preTxInfo = await baseRay
