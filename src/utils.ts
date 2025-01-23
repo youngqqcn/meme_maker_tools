@@ -119,3 +119,20 @@ export async function sol_transfer(
 export function getRandomInRange(min: number, max: number): number {
     return Math.random() * (max - min + 1) + min;
 }
+
+
+// 洗牌算法
+export function shuffle<T>(array: T[]): T[] {
+    // 创建数组的副本，避免修改原数组
+    const arr = [...array];
+
+    for (let i = arr.length - 1; i > 0; i--) {
+        // 生成一个 [0, i] 范围内的随机索引
+        const j = Math.floor(Math.random() * (i + 1));
+
+        // 交换 arr[i] 和 arr[j]
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+
+    return arr;
+}

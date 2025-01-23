@@ -3,7 +3,12 @@
 */
 
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { getRandomInRange, getTokenBalance, parseCsvFile } from "../../utils";
+import {
+    getRandomInRange,
+    getTokenBalance,
+    parseCsvFile,
+    shuffle,
+} from "../../utils";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
 import { getSlippage, sleep } from "../../base/utils";
@@ -16,7 +21,7 @@ interface CsvRecord {
 (async () => {
     const RPC_ENDPOINT_MAIN =
         "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
-        // "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
+    // "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -47,10 +52,13 @@ interface CsvRecord {
     });
     console.log("poolId: ", poolId.toBase58());
 
-    let sleep_ms = 20*60_000; // 间隔时间(毫秒)
+    let sleep_ms = 20 * 60_000; // 间隔时间(毫秒)
 
     while (true) {
         try {
+            // 打乱顺序
+            datas = shuffle(datas);
+
             for (let data of datas) {
                 console.log("===============");
                 console.log("Key: ", data.key);

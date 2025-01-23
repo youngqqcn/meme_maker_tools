@@ -11,7 +11,7 @@
 */
 
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { getRandomInRange, parseCsvFile } from "../../utils";
+import { getRandomInRange, parseCsvFile, shuffle } from "../../utils";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
 import { getSlippage, sleep } from "../../base/utils";
@@ -57,25 +57,26 @@ interface CsvRecord {
     });
     console.log("poolId: ", poolId.toBase58());
 
-    datas.reverse()
-
     while (true) {
+        // 打乱顺序
+        datas = shuffle(datas);
+
         for (let data of datas) {
-            console.log("===============");
-            console.log(data.key);
-
-            let from = Keypair.fromSecretKey(
-                Uint8Array.from(bs58.decode(data.key.trim()))
-            );
-            console.log(`当前处理: ${from.publicKey.toBase58()} `);
-
-            // let amount = Math.round(getRandomInRange(1000, 5000));
-            let amount = 0.05 + ((Math.random() * 100) % 20) / 1000; // 按照SOL数量购买
-
-            console.log("买入数量: ", amount);
-
-            // 买入
             try {
+                console.log("===============");
+                console.log(data.key);
+
+                let from = Keypair.fromSecretKey(
+                    Uint8Array.from(bs58.decode(data.key.trim()))
+                );
+                console.log(`当前处理: ${from.publicKey.toBase58()} `);
+
+                // let amount = Math.round(getRandomInRange(1000, 5000));
+                let amount = 0.05 + ((Math.random() * 100) % 20) / 1000; // 按照SOL数量购买
+
+                console.log("买入数量: ", amount);
+
+                // 买入
                 // 特别注意： 要注意却分base 和 quote , 使用自己工具建的池子，base是token, quote是SOL
                 let ret = await swap(
                     connection,
