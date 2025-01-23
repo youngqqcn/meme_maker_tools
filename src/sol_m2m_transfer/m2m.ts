@@ -94,10 +94,10 @@ interface CsvRecord {
 
                 // let sleep_ms = (13 + ((Math.random() * 10) % 5)) * 60 * 1000;
                 // let sleep_ms = 11.33 * 60 * 1000;
-                let sleep_ms = (10 + ((Math.random() * 10) % 7)) * 1000;
+                let sleep_ms = 3 * 60 * 1000;
 
                 console.log("开始休眠", sleep_ms, " ms");
-                // await sleep(sleep_ms); //
+                await sleep(sleep_ms); //
             } catch (e) {
                 console.log("error: ", e);
                 failedList.push(data);
