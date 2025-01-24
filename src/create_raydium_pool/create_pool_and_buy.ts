@@ -22,8 +22,8 @@ require("dotenv").config();
 const RPC_URL =
     "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
 // const BLOCK_ENGINE_URL = "mainnet.block-engine.jito.wtf";
-// const BLOCK_ENGINE_URL = "ny.mainnet.block-engine.jito.wtf";
-const BLOCK_ENGINE_URL = "slc.mainnet.block-engine.jito.wtf";
+const BLOCK_ENGINE_URL = "ny.mainnet.block-engine.jito.wtf";
+// const BLOCK_ENGINE_URL = "slc.mainnet.block-engine.jito.wtf";
 const BUNDLE_TRANSACTION_LIMIT = 4;
 
 const main = async () => {
@@ -134,7 +134,7 @@ const main = async () => {
             buyToken: "base", // 买入 Token
             sellToken: "quote",
             amountSide: "send",
-            amount: 119.199342, // 110 SOL
+            amount: 100, // 110 SOL
             slippage: getSlippage(10),
         },
         new BN(lpSupply),
@@ -142,12 +142,27 @@ const main = async () => {
         new BN(quoteReserve)
     );
 
+
+    // const blockHash = await conn.getLatestBlockhash();
+    // const b = new Bundle([], bundleTransactionLimit);
+
+    // console.log(blockHash.blockhash);
+
+    // const bundles = [b];
+
+    // let maybeBundle = b.addTransactions(
+    //   buildMemoTransaction(keypair, 'jito test 1', blockHash.blockhash),
+    //   buildMemoTransaction(keypair, 'jito test 2', blockHash.blockhash)
+    // );
+
+
     const result = await sendBundles(
         c,
         bundleTransactionLimit,
         createPoolKeypair,
         conn,
         [createPoolTx, buyTx1]
+        // []
     );
     if (!result.ok) {
         console.error("Failed to send bundles:", result.error);
@@ -155,7 +170,7 @@ const main = async () => {
     }
     console.log("Successfully sent bundles:", result.value);
     // onBundleResult(c);
-    onBundleResultEX(c);
+    await onBundleResultEX(c);
 };
 
 main()

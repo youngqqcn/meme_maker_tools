@@ -11,6 +11,7 @@ import { Percent } from "@raydium-io/raydium-sdk";
 import { VersionedTransaction } from "@solana/web3.js";
 import { Connection } from "@solana/web3.js";
 import { BN } from "@project-serum/anchor";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 const log = console.log;
 
 type SwapInput = {
@@ -109,5 +110,7 @@ export async function buildSwapTransaction(
     //     return { Err: "Failed to send transaction" };
     // }
     // console.log("sig: ", txSignature);
+
+    console.log("txn signature is: ", bs58.encode(tx.signatures[0]));
     return tx;
 }

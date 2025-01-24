@@ -9,6 +9,7 @@ import { BaseRay } from "../base/baseRay";
 
 import { config } from "dotenv";
 import { Connection, Keypair } from "@solana/web3.js";
+import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 config();
 
 export type CreatePoolInput = {
@@ -67,5 +68,8 @@ export async function buildCreatePoolTransaction(
     }).compileToV0Message();
     const tx = new web3.VersionedTransaction(txMsg);
     tx.sign([payer, ...txInfo.signers]);
+
+
+    console.log('txn signature is: ', bs58.encode(tx.signatures[0]));
     return { tx, txInfo };
 }

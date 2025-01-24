@@ -61,8 +61,8 @@ export const sendBundles = async (
         // console.log("tip account:", _tipAccount);
         // const tipAccount = new PublicKey(_tipAccount);
 
-        const balance = await conn.getBalance(keypair.publicKey);
-        console.log("current account has balance: ", balance);
+        // const balance = await conn.getBalance(keypair.publicKey);
+        // console.log("current account has balance: ", balance);
 
         // let isLeaderSlot = false;
         // while (!isLeaderSlot) {
@@ -98,10 +98,26 @@ export const sendBundles = async (
             };
         }
 
+        // let maybeBundle = b.addTransactions(
+        //     buildMemoTransaction(keypair, "jito test 1", blockHash.blockhash),
+        //     buildMemoTransaction(keypair, "jito test 2", blockHash.blockhash)
+        // );
+        // if (isError(maybeBundle)) {
+        //     return {
+        //         ok: false,
+        //         error: new SearcherClientError(
+        //             3, // INVALID_ARGUMENT
+        //             "Failed to add transactions to bundle",
+        //             maybeBundle.message
+        //         ),
+        //     };
+        // }
+
         // 小费交易 必须在第一个， 否则失败
         maybeBundle = b.addTipTx(
             keypair,
             0.01 * 10 ** 9,
+            // 0.00001 * 10 ** 9,
             tipAccount,
             blockHash.blockhash
         );
@@ -143,8 +159,7 @@ export const sendBundles = async (
             let r = await c.sendBundle(maybeBundle);
             // logger.info("Bundling done")
             // return {ok: true, }
-            console.log("r: ", r)
-
+            console.log("r: ", r);
         } catch (e) {
             console.log("发送bundle交易错误:", e);
             return {
@@ -178,55 +193,52 @@ export const onBundleResult = (c: SearcherClient) => {
     );
 };
 
-
-
 export const onBundleResultEX = (c: SearcherClient): Promise<number> => {
-    let first = 0
-    let isResolved = false
+    let first = 0;
+    let isResolved = false;
 
     return new Promise((resolve) => {
-      // Set a timeout to reject the promise if no bundle is accepted within 5 seconds
-      setTimeout(() => {
-        resolve(first)
-        isResolved = true
-      }, 30000)
+        // Set a timeout to reject the promise if no bundle is accepted within 5 seconds
+        setTimeout(() => {
+            resolve(first);
+            isResolved = true;
+        }, 30000);
 
-      c.onBundleResult(
-        (result: any) => {
-          if (isResolved) return first
-          // clearTimeout(timeout) // Clear the timeout if a bundle is accepted
-          const bundleId = result.bundleId
-          const isAccepted = result.accepted
-          const isRejected = result.rejected
-          if (isResolved == false) {
-
-            if (isAccepted) {
-              console.log(
-                "bundle accepted, ID:",
-                result.bundleId,
-                " Slot: ",
-                result.accepted!.slot
-              )
-              first += 1
-              isResolved = true
-              // Resolve with 'first' when a bundle is accepted
-              resolve(first)
+        c.onBundleResult(
+            (result: any) => {
+                if (isResolved) return first;
+                // clearTimeout(timeout) // Clear the timeout if a bundle is accepted
+                const bundleId = result.bundleId;
+                const isAccepted = result.accepted;
+                const isRejected = result.rejected;
+                if (isResolved == false) {
+                    if (isAccepted) {
+                        console.log(
+                            "bundle accepted, ID:",
+                            result.bundleId,
+                            " Slot: ",
+                            result.accepted!.slot
+                        );
+                        first += 1;
+                        isResolved = true;
+                        // Resolve with 'first' when a bundle is accepted
+                        resolve(first);
+                    }
+                    if (isRejected) {
+                        console.warn("bundle is Rejected\n", result);
+                        // Do not resolve or reject the promise here
+                    }
+                }
+            },
+            (e: any) => {
+                console.log(e);
+                // Do not reject the promise here
             }
-            if (isRejected) {
-              console.warn("bundle is Rejected\n", result)
-              // Do not resolve or reject the promise here
-            }
-          }
-        },
-        (e: any) => {
-          console.log(e)
-          // Do not reject the promise here
-        }
-      )
-    })
-  }
+        );
+    });
+};
 
-const buildMemoTransaction = (
+export const buildMemoTransaction = (
     keypair: Keypair,
     message: string,
     recentBlockhash: string
