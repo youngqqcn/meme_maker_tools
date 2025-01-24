@@ -23,7 +23,8 @@ const connection = new Connection(
 
 // 目标Token的Mint地址
 const mintAddress = new PublicKey(
-    "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9"
+    // "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9"
+    "84FhSgZexvSf2pjGGRSiAWtvJJHZcS6VVrXhJmqYmidx"
 ); // 替换为实际Mint地址
 
 async function getTokenHolders() {
