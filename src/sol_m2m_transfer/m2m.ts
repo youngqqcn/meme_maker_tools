@@ -33,8 +33,9 @@ interface CsvRecord {
     let dataFilePath = args[0];
 
     const RPC_ENDPOINT_MAIN =
-        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
-        "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
+        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+        // https://mainnet.helius-rpc.com/?api-key=29acd0dc-e336-4909-873a-0ed1010a9de2 ; // yqq 163.com
+        // "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -96,10 +97,18 @@ interface CsvRecord {
                 // let sleep_ms = 11.33 * 60 * 1000;
                 let sleep_ms = 3 * 60 * 1000;
 
-                console.log("开始休眠", sleep_ms, " ms");
-                await sleep(sleep_ms); //
+                // console.log("开始休眠", sleep_ms, " ms");
+                // await sleep(sleep_ms); //
+
+                await sleep(2000); //链式转账，必须休眠一下, 防止余额没更新过来
             } catch (e) {
                 console.log("error: ", e);
+
+
+                // 如果是链式转账，出现失败，直接停止
+                // return
+
+
                 failedList.push(data);
             }
         }

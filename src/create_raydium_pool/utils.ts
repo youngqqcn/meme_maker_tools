@@ -17,6 +17,7 @@ import { Bundle } from "jito-ts/dist/sdk/block-engine/types";
 import { Err, isError, Result } from "jito-ts/dist/sdk/block-engine/utils";
 import { buildSwapTransaction } from "./build_swap_tx";
 import { getSlippage } from "../base/utils";
+import { getRandomElementX } from "../utils";
 
 const MEMO_PROGRAM_ID = "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo";
 
@@ -27,6 +28,7 @@ export const sendBundles = async (
     conn: Connection,
     txs: VersionedTransaction[]
 ): Promise<Result<string[], SearcherClientError>> => {
+    console.log("########进入SendBundles########");
     if (bundleTransactionLimit > 4) {
         console.log("bundleTransactionLimit 必须小于4");
         return {
@@ -40,32 +42,43 @@ export const sendBundles = async (
     }
 
     try {
-        const tipAccountResult = await c.getTipAccounts();
-        if (!tipAccountResult.ok) {
-            return tipAccountResult;
-        }
-        const _tipAccount = tipAccountResult.value[0];
-        console.log("tip account:", _tipAccount);
-        const tipAccount = new PublicKey(_tipAccount);
+        let tipAccount = getRandomElementX([
+            new PublicKey("96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5"),
+            new PublicKey("HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe"),
+            new PublicKey("Cw8CFyM9FkoMi7K7Crf6HNQqf4uEMzpKw6QNghXLvLkY"),
+            new PublicKey("ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49"),
+            new PublicKey("DfXygSm4jCyNCybVYYK6DwvWqjKee8pbDmJGcLWNDXjh"),
+            new PublicKey("ADuUkR4vqLUMWXxW9gh6D6L8pMSawimctcNZ5pGwDcEt"),
+            new PublicKey("DttWaMuVvTiduZRnguLF7jNxTgiMBZ1hyAumKUiL2KRL"),
+            new PublicKey("3AVi9Tg9Uo68tJfuvoKvqKNWKkC5wPdSSdeBnizKZ6jT"),
+        ]);
+
+        // const tipAccountResult = await c.getTipAccounts();
+        // if (!tipAccountResult.ok) {
+        //     return tipAccountResult;
+        // }
+        // const _tipAccount = tipAccountResult.value[0];
+        // console.log("tip account:", _tipAccount);
+        // const tipAccount = new PublicKey(_tipAccount);
 
         const balance = await conn.getBalance(keypair.publicKey);
         console.log("current account has balance: ", balance);
 
-        let isLeaderSlot = false;
-        while (!isLeaderSlot) {
-            const next_leader = await c.getNextScheduledLeader();
-            if (!next_leader.ok) {
-                return next_leader;
-            }
-            const num_slots =
-                next_leader.value.nextLeaderSlot -
-                next_leader.value.currentSlot;
-            isLeaderSlot = num_slots <= 2;
-            console.log(`next jito leader slot in ${num_slots} slots`);
-            await new Promise((r) => setTimeout(r, 500));
-        }
+        // let isLeaderSlot = false;
+        // while (!isLeaderSlot) {
+        //     const next_leader = await c.getNextScheduledLeader();
+        //     if (!next_leader.ok) {
+        //         return next_leader;
+        //     }
+        //     const num_slots =
+        //         next_leader.value.nextLeaderSlot -
+        //         next_leader.value.currentSlot;
+        //     isLeaderSlot = num_slots <= 2;
+        //     console.log(`next jito leader slot in ${num_slots} slots`);
+        //     await new Promise((r) => setTimeout(r, 2000));
+        // }
 
-        const blockHash = await conn.getLatestBlockhash("processed"); // 这里使用 processed
+        const blockHash = await conn.getLatestBlockhash(); // 这里使用 processed
         console.log(blockHash.blockhash);
         const b = new Bundle([], bundleTransactionLimit);
         console.log("========$$$$$$$$===========$$$$$$$$$===========");
@@ -88,7 +101,7 @@ export const sendBundles = async (
         // 小费交易 必须在第一个， 否则失败
         maybeBundle = b.addTipTx(
             keypair,
-            0.001 * 10 ** 9,
+            0.01 * 10 ** 9,
             tipAccount,
             blockHash.blockhash
         );
@@ -103,37 +116,48 @@ export const sendBundles = async (
             };
         }
 
-        type BundleResponse = Result<string, SearcherClientError>;
-        const results: BundleResponse[] = await Promise.all(
-            bundles.map(async (b) => {
-                try {
-                    const resp = await c.sendBundle(b);
-                    if (!resp.ok) {
-                        return resp;
-                    }
-                    console.log("resp:", resp.value);
-                    return resp;
-                } catch (e) {
-                    console.error("error sending bundle:", e);
-                    return {
-                        ok: false,
-                        error: e as SearcherClientError,
-                    };
-                }
-            })
-        );
+        console.log("所有交易数量：", txs.length + 1);
+        console.log("bundles length = ", bundles.length);
 
-        // Check if any bundle sends failed
-        const error = results.find((r) => !r.ok);
-        if (error && !error.ok) {
-            return { ok: false, error: error.error };
+        // type BundleResponse = Result<string, SearcherClientError>;
+        // const results: BundleResponse[] = await Promise.all(
+        //     bundles.map(async (x) => {
+        //         try {
+        //             const resp = await c.sendBundle(x);
+        //             if (!resp.ok) {
+        //                 return resp;
+        //             }
+        //             console.log("resp:", resp.value);
+        //             return resp;
+        //         } catch (e) {
+        //             console.error("error sending bundle:", e);
+        //             return {
+        //                 ok: false,
+        //                 error: e as SearcherClientError,
+        //             };
+        //         }
+        //     })
+        // );
+
+        try {
+            let r = await c.sendBundle(maybeBundle);
+            // logger.info("Bundling done")
+            // return {ok: true, }
+            console.log("r: ", r)
+
+        } catch (e) {
+            console.log("发送bundle交易错误:", e);
+            return {
+                ok: false,
+                error: new SearcherClientError(
+                    3, // INVALID_ARGUMENT
+                    "Failed to add jito tip tx to bundle",
+                    ""
+                ),
+            };
         }
 
-        // At this point we know all results are successful
-        const successResults = results.filter(
-            (r): r is { ok: true; value: string } => r.ok
-        );
-        return { ok: true, value: successResults.map((r) => r.value) };
+        return { ok: true, value: [""] };
     } catch (e) {
         return {
             ok: false,
@@ -153,6 +177,54 @@ export const onBundleResult = (c: SearcherClient) => {
         }
     );
 };
+
+
+
+export const onBundleResultEX = (c: SearcherClient): Promise<number> => {
+    let first = 0
+    let isResolved = false
+
+    return new Promise((resolve) => {
+      // Set a timeout to reject the promise if no bundle is accepted within 5 seconds
+      setTimeout(() => {
+        resolve(first)
+        isResolved = true
+      }, 30000)
+
+      c.onBundleResult(
+        (result: any) => {
+          if (isResolved) return first
+          // clearTimeout(timeout) // Clear the timeout if a bundle is accepted
+          const bundleId = result.bundleId
+          const isAccepted = result.accepted
+          const isRejected = result.rejected
+          if (isResolved == false) {
+
+            if (isAccepted) {
+              console.log(
+                "bundle accepted, ID:",
+                result.bundleId,
+                " Slot: ",
+                result.accepted!.slot
+              )
+              first += 1
+              isResolved = true
+              // Resolve with 'first' when a bundle is accepted
+              resolve(first)
+            }
+            if (isRejected) {
+              console.warn("bundle is Rejected\n", result)
+              // Do not resolve or reject the promise here
+            }
+          }
+        },
+        (e: any) => {
+          console.log(e)
+          // Do not reject the promise here
+        }
+      )
+    })
+  }
 
 const buildMemoTransaction = (
     keypair: Keypair,

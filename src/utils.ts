@@ -99,7 +99,7 @@ export async function sol_transfer(
         SystemProgram.transfer({
             fromPubkey: from.publicKey,
             toPubkey: dest,
-            lamports: lamports,
+            lamports: Math.floor(lamports),
         })
     );
 

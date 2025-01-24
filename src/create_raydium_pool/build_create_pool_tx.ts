@@ -3,28 +3,12 @@
 */
 
 // 创建 raydium池子
-import { BN, web3 } from "@project-serum/anchor";
-import { Result } from "../base/types";
-// import { CreatePoolInput, CustomWallet } from "./types";
-
-import { sleep } from "../utils";
-import {
-    COMPUTE_UNIT_PRICE,
-    // getMysqlPooolOpts,
-    RPC_ENDPOINT_DEV,
-    RPC_ENDPOINT_MAIN,
-} from "../base/config";
+import { web3 } from "@project-serum/anchor";
+import { COMPUTE_UNIT_PRICE } from "../base/config";
 import { BaseRay } from "../base/baseRay";
-// import { getExplorerLink } from "@solana-developers/helpers";
-// import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 
 import { config } from "dotenv";
-import {
-    Connection,
-    Keypair,
-    PublicKey,
-    VersionedTransaction,
-} from "@solana/web3.js";
+import { Connection, Keypair } from "@solana/web3.js";
 config();
 
 export type CreatePoolInput = {
@@ -39,6 +23,7 @@ export async function buildCreatePoolTransaction(
     payer: Keypair,
     input: CreatePoolInput
 ) {
+    console.log("=====进入buildCreatePoolTransaction =====");
     let { baseMintAmount, quoteMintAmount, marketId } = input;
     // let wallet = new CustomWallet();
     console.log("payer: " + payer.publicKey.toBase58());
@@ -82,5 +67,5 @@ export async function buildCreatePoolTransaction(
     }).compileToV0Message();
     const tx = new web3.VersionedTransaction(txMsg);
     tx.sign([payer, ...txInfo.signers]);
-    return { tx , txInfo};
+    return { tx, txInfo };
 }

@@ -22,9 +22,18 @@ interface CsvRecord {
 }
 
 (async () => {
+    const args = process.argv.slice(2); // 去掉前两个默认元素
+    console.log("命令行参数:", args);
+    if (args.length == 0) {
+        console.log("请输入 csv文件路径");
+        return;
+    }
+    let buyerKeyIndex = parseInt(args[0]);
+
     const RPC_ENDPOINT_MAIN =
         // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
         "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
+        // "https://mainnet.helius-rpc.com/?api-key=29acd0dc-e336-4909-873a-0ed1010a9de2"; // 李咏，付费RPC
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -44,7 +53,15 @@ interface CsvRecord {
     }
     console.log("datas长度", datas.length);
 
-    let mint = "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9";
+    // 获取一个
+    datas = [
+        {
+            key: datas[buyerKeyIndex].key,
+        },
+    ];
+    console.log("datas长度", datas.length);
+
+    let mint = "84FhSgZexvSf2pjGGRSiAWtvJJHZcS6VVrXhJmqYmidx";
     // let poolId = new PublicKey("21WUaeHRDVnCDaC3ZPh8veJ3TiAxdV1rWJ6nZeqvAAwo");
 
     let marketId = await getOpenBookMarketKeypair(mint);
@@ -55,11 +72,12 @@ interface CsvRecord {
             MAINNET_PROGRAM_ID.AmmV4 // "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
         ), // mainnet
     });
-    console.log("poolId: ", poolId.toBase58());
 
     while (true) {
         for (let data of datas) {
             console.log("===============");
+            console.log("marketId: ", marketId.publicKey.toBase58());
+            console.log("poolId: ", poolId.toBase58());
             console.log(data.key);
 
             let from = Keypair.fromSecretKey(
@@ -68,7 +86,7 @@ interface CsvRecord {
             console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
             // 随机买入 5.0 ~ 5.2 SOL
-            let amount = 5 + (Math.floor(Math.random() * 1000) % 200) / 1000; // 按照SOL数量购买
+            let amount = 2.55 + (Math.floor(Math.random() * 1000) % 200) / 1000; // 按照SOL数量购买
 
             console.log("买入数量: ", amount);
 
@@ -95,12 +113,12 @@ interface CsvRecord {
                         sellToken: "quote", //"quote",
                         amountSide: "send",
                         amount: amount,
-                        slippage: getSlippage(5),
+                        slippage: getSlippage(15),
                     },
 
                     // 7-3开：  7成作为 priority fee,  3成作为 jito费
                     // https://docs.jito.wtf/lowlatencytxnsend/#tip-amount
-                    35_000_000, // Compute Price ,  200000 * 350 / 10**9 = 0.07
+                    10_000_000, // Compute Price ,  200000 * 350 / 10**9 = 0.07
                     0.03 // jito费用
                 );
 
