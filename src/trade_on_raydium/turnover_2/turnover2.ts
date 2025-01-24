@@ -35,7 +35,7 @@ interface CsvRecord {
     }
     console.log("datas长度", datas.length);
 
-    let mint = "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9";
+    let mint = "84FhSgZexvSf2pjGGRSiAWtvJJHZcS6VVrXhJmqYmidx";
     let marketId = await getOpenBookMarketKeypair(mint);
     console.log("marketId: ", marketId.publicKey.toBase58());
     let poolId = Liquidity.getAssociatedId({
