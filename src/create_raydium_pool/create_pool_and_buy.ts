@@ -66,7 +66,7 @@ const main = async () => {
     // 共用一个 BaseRay对象，以便来获得 PoolKeys
     const baseRay = new BaseRay({ rpcEndpointUrl: conn.rpcEndpoint });
 
-    let baseMintAmount = 10_0000_0000;
+    let baseMintAmount = 2_0690_0000;
     let baseDecimals = 6;
     let quoteMintAmount = 20;
     let quoteDecimals = 9;
@@ -134,27 +134,13 @@ const main = async () => {
             buyToken: "base", // 买入 Token
             sellToken: "quote",
             amountSide: "send",
-            amount: 100, // 110 SOL
-            slippage: getSlippage(10),
+            amount: 115, // 110 SOL
+            slippage: getSlippage(3),
         },
         new BN(lpSupply),
         new BN(baseReserve),
         new BN(quoteReserve)
     );
-
-
-    // const blockHash = await conn.getLatestBlockhash();
-    // const b = new Bundle([], bundleTransactionLimit);
-
-    // console.log(blockHash.blockhash);
-
-    // const bundles = [b];
-
-    // let maybeBundle = b.addTransactions(
-    //   buildMemoTransaction(keypair, 'jito test 1', blockHash.blockhash),
-    //   buildMemoTransaction(keypair, 'jito test 2', blockHash.blockhash)
-    // );
-
 
     const result = await sendBundles(
         c,
