@@ -150,7 +150,7 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
                     console.log("data.amount: ", data.amount);
                     console.log("data.decimals", data.decimals);
                     amount = Math.floor(
-                        (amount + getRandomInRange(1, 1000)) *
+                        (amount + getRandomInRange(500, 1000)) *
                             Math.pow(10, Number(data.decimals))
                     );
                     console.log("amount = ", amount);
@@ -164,7 +164,7 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
                 // 更新计算单元价格
                 const updateCULimit =
                     web3.ComputeBudgetProgram.setComputeUnitLimit({
-                        units: 35000,
+                        units: 50000,
                     });
                 const updateCuIx =
                     web3.ComputeBudgetProgram.setComputeUnitPrice({
