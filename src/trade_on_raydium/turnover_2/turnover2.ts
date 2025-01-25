@@ -60,7 +60,7 @@ interface CsvRecord {
             );
             console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
-            let turnOverAmount = getRandomInRange(2000, 5000);
+            let turnOverAmount = getRandomInRange(1000, 3000);
             try {
                 let rawBalance = await getTokenBalance(
                     connection,
