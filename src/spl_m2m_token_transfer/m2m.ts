@@ -150,7 +150,7 @@ async function getTokenHolders(connection: Connection, mintAddress: PublicKey) {
                     console.log("data.amount: ", data.amount);
                     console.log("data.decimals", data.decimals);
                     amount = Math.floor(
-                        (amount + getRandomInRange(1, 100)) *
+                        (amount + getRandomInRange(1, 1000)) *
                             Math.pow(10, Number(data.decimals))
                     );
                     console.log("amount = ", amount);
