@@ -75,7 +75,8 @@ async function getTokenHolders() {
 
 (async () => {
     try {
-        let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data.csv");
+        let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data_koiai.csv");
+        // let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data_cami.csv");
         console.log("地址数", datas.length);
 
         // 获取holders

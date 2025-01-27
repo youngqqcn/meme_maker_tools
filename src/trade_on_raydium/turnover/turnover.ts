@@ -2,7 +2,12 @@
 换手
 */
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { getRandomInRange, getTokenBalance, parseCsvFile, shuffle } from "../../utils";
+import {
+    getRandomInRange,
+    getTokenBalance,
+    parseCsvFile,
+    shuffle,
+} from "../../utils";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
 import { calcDecimalValue, getSlippage, sleep } from "../../base/utils";
@@ -61,53 +66,25 @@ interface CsvRecord {
             console.log(`当前处理: ${from.publicKey.toBase58()} `);
 
             let turnOverAmount = getRandomInRange(1000, 4000);
-            try {
-                let rawBalance = await getTokenBalance(
-                    connection,
-                    from.publicKey,
-                    new PublicKey(mint)
-                );
-
-                // 先卖出，再买入
-                let balance = calcDecimalValue(Number(rawBalance), 6);
-                if (balance > turnOverAmount) {
-                    console.log("balance: ", Number(balance));
-                    // if (balance < BigInt(101)) {
-                    //     console.log("token余额不足100");
-                    //     continue;
-                    // }
-                    // 卖出
-                    console.log("====卖出数量:", turnOverAmount);
-                    let ret = await swap(connection, from, {
-                        poolId: poolId,
-                        buyToken: "quote",
-                        sellToken: "base",
-                        amountSide: "send",
-                        amount: turnOverAmount,
-                        slippage: getSlippage(15),
-                    }, 100_000, 0.00001);
-                    if (ret.Err) {
-                        console.error(ret.Err);
-                    } else {
-                        console.log("sig:", ret.Ok?.txSignature);
-                    }
-                }
-            } catch (e) {
-                console.log("error: ", e);
-            }
 
             // 买入
             try {
                 if (turnOverAmount > 0) {
                     console.log("===买入数量: ", turnOverAmount);
-                    let ret = await swap(connection, from, {
-                        poolId: poolId,
-                        buyToken: "base", // 买入 Token
-                        sellToken: "quote",
-                        amountSide: "receive",
-                        amount: Number(turnOverAmount),
-                        slippage: getSlippage(15),
-                    }, 100_000, 0.00001);
+                    let ret = await swap(
+                        connection,
+                        from,
+                        {
+                            poolId: poolId,
+                            buyToken: "base", // 买入 Token
+                            sellToken: "quote",
+                            amountSide: "receive",
+                            amount: Number(turnOverAmount),
+                            slippage: getSlippage(30),
+                        },
+                        200_000,
+                        0.00001
+                    );
                     if (ret.Err) {
                         console.error(ret.Err);
                     } else {
@@ -119,6 +96,42 @@ interface CsvRecord {
                 console.error("交易失败:", e);
             }
 
+            try {
+                let rawBalance = await getTokenBalance(
+                    connection,
+                    from.publicKey,
+                    new PublicKey(mint)
+                );
+
+                let balance = calcDecimalValue(Number(rawBalance), 6);
+                if (balance > turnOverAmount) {
+                    console.log("balance: ", Number(balance));
+
+                    // 卖出
+                    console.log("====卖出数量:", turnOverAmount);
+                    let ret = await swap(
+                        connection,
+                        from,
+                        {
+                            poolId: poolId,
+                            buyToken: "quote",
+                            sellToken: "base",
+                            amountSide: "send",
+                            amount: turnOverAmount,
+                            slippage: getSlippage(30),
+                        },
+                        200_000,
+                        0.00001
+                    );
+                    if (ret.Err) {
+                        console.error(ret.Err);
+                    } else {
+                        console.log("sig:", ret.Ok?.txSignature);
+                    }
+                }
+            } catch (e) {
+                console.log("error: ", e);
+            }
         }
     }
 })();
