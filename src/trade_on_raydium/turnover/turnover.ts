@@ -20,9 +20,7 @@ interface CsvRecord {
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
-        "https://mainnet.helius-rpc.com/?api-key=adbb2586-7020-4d8b-b814-e4f39bcd36c6"; // 李咏，付费RPC
-
+        "https://mainnet.helius-rpc.com/?api-key=b96c955e-7a00-4375-bc91-0b3d8baafbf7";
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=f95cc4fe-fe7c-4de8-abed-eaefe0771ba7";
 
