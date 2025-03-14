@@ -61,11 +61,14 @@ export async function closeTokenAccount(
 
     // 加速 speedup
     const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_000_000, // 1 lamports
+        microLamports: 100_000, // 1 lamports
+    });
+    const updateCULimit = web3.ComputeBudgetProgram.setComputeUnitLimit({
+        units: 8100,
     });
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    let tx = new web3.Transaction().add(updateCuIx, ixTransfer, ixClose);
+    let tx = new web3.Transaction().add(updateCULimit, updateCuIx, ixTransfer, ixClose);
 
     // 如果是 Wrapped SOL ，不要销毁，只需Close, SOL会自动redeem为SOL
     if (
