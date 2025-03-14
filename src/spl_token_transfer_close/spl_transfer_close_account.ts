@@ -120,7 +120,11 @@ export async function closeTokenAccount(
     let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data.csv");
     console.log("datas长度", datas.length);
 
+
+    datas = datas.slice(3024);
     for (let data of datas) {
+
+
         let owner = web3.Keypair.fromSecretKey(
             Uint8Array.from(bs58.decode(data.fromkey.trim()))
         );
