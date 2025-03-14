@@ -64,7 +64,7 @@ export async function closeTokenAccount(
         microLamports: 100_000, // 1 lamports
     });
     const updateCULimit = web3.ComputeBudgetProgram.setComputeUnitLimit({
-        units: 8100,
+        units: 7959,
     });
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
@@ -121,7 +121,7 @@ export async function closeTokenAccount(
     console.log("datas长度", datas.length);
 
 
-    datas = datas.slice(3024);
+    datas = datas.slice(3062);
     for (let data of datas) {
 
 
