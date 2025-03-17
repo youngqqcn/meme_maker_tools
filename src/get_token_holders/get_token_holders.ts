@@ -23,8 +23,8 @@ const connection = new Connection(
 
 // 目标Token的Mint地址
 const mintAddress = new PublicKey(
-    // "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9"
-    "84FhSgZexvSf2pjGGRSiAWtvJJHZcS6VVrXhJmqYmidx"
+    "DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9" // CAMI
+    // "84FhSgZexvSf2pjGGRSiAWtvJJHZcS6VVrXhJmqYmidx" // KOIAI
 ); // 替换为实际Mint地址
 
 async function getTokenHolders() {
@@ -75,8 +75,8 @@ async function getTokenHolders() {
 
 (async () => {
     try {
-        let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data_koiai.csv");
-        // let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data_cami.csv");
+        // let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data_koiai.csv");
+        let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data_cami.csv");
         console.log("地址数", datas.length);
 
         // 获取holders
@@ -97,6 +97,7 @@ async function getTokenHolders() {
         let poolTokenSum = 0;
 
         let extAddrs = [];
+        let innerAddrs = [];
         for (let [k, v] of holders) {
             if (v["balance"] > 0) {
                 if (k == "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1") {
@@ -113,6 +114,7 @@ async function getTokenHolders() {
                     extAddrCount += 1;
                 } else {
                     innertTokenSum += v["balance"];
+                    innerAddrs.push(v);
                 }
             }
         }
@@ -122,6 +124,13 @@ async function getTokenHolders() {
         extAddrs.forEach((a: any) =>
             console.log(String(a["ownerAddress"]).padStart(45), Number(a["balance"]).toFixed(2).toString().padEnd(15), (Number(a["balance"])/10_0000_0000).toFixed(8).toString() + '%')
         );
+
+        // innerAddrs.sort((a: any, b: any) => b["balance"] - a["balance"]); // 倒序排序，大的在前
+        // console.log("地址".padStart(35), "token数量".padStart(15), "占比(%)".padStart(12));
+        // innerAddrs.forEach((a: any) =>
+        //     console.log(String(a["ownerAddress"]).padStart(45), Number(a["balance"]).toFixed(2).toString().padEnd(15), (Number(a["balance"])/10_0000_0000).toFixed(8).toString() + '%')
+        // );
+
 
         console.log("==========================");
         console.log("总有效持仓地址数: ", totalHolders);

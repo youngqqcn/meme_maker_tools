@@ -11,7 +11,7 @@ import {
 } from "../../utils";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { swap } from "../swap";
-import { getSlippage, sleep } from "../../base/utils";
+import { calcDecimalValue, getSlippage, sleep } from "../../base/utils";
 import { getOpenBookMarketKeypair } from "../../base/getOpenBookMarketKeypair";
 import { Liquidity, MAINNET_PROGRAM_ID } from "@raydium-io/raydium-sdk";
 interface CsvRecord {
@@ -83,7 +83,7 @@ interface CsvRecord {
                 //     amount = Number(balance);
                 // }
 
-                let amount = Number(balance) - 1000;
+                let amount = calcDecimalValue(Number(balance), 6);
 
                 console.log("卖出数量: ", amount);
 

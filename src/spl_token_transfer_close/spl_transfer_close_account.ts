@@ -24,6 +24,7 @@ export async function closeTokenAccount(
     payer: Keypair
 ) {
     console.log("=========closeTokenAccount=============");
+    console.log("处理地址: ", owner.publicKey.toBase58());
     const ata = getAssociatedTokenAddressSync(mint, owner.publicKey);
 
     let amount = null;
@@ -38,6 +39,7 @@ export async function closeTokenAccount(
             return;
         }
     }
+    console.log("balance: " + amount)
 
     // const ixBurn = createBurnInstruction(ata, mint, owner.publicKey, amount, [
     //     payer,
@@ -61,14 +63,19 @@ export async function closeTokenAccount(
 
     // 加速 speedup
     const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 100_000, // 1 lamports
+        microLamports: 200_000, // 1 lamports
     });
     const updateCULimit = web3.ComputeBudgetProgram.setComputeUnitLimit({
-        units: 7959,
+        units: 15959,
     });
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    let tx = new web3.Transaction().add(updateCULimit, updateCuIx, ixTransfer, ixClose);
+    let tx = new web3.Transaction().add(
+        updateCULimit,
+        updateCuIx,
+        ixTransfer,
+        ixClose
+    );
 
     // 如果是 Wrapped SOL ，不要销毁，只需Close, SOL会自动redeem为SOL
     if (
@@ -120,14 +127,26 @@ export async function closeTokenAccount(
     let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data.csv");
     console.log("datas长度", datas.length);
 
+    // datas = datas.slice(3062);
 
-    datas = datas.slice(3062);
+    // let innerSet = new Set([
+    //     "EgPPP2MNnL8Lc7ta7dp4upZYTGzFpnUkFNFFq1VnAh6L",
+    //     "1hsVxBCf2pvQefLinG87qruZWqaGx9dDnbtpFmv4dXY",
+    // ]);
+
     for (let data of datas) {
 
 
         let owner = web3.Keypair.fromSecretKey(
             Uint8Array.from(bs58.decode(data.fromkey.trim()))
         );
+
+        // if (!innerSet.has(owner.publicKey.toBase58())) {
+        //     continue
+        // }
+
+
+
         let mint = new PublicKey(data.mint.trim());
         let payer = Keypair.fromSecretKey(
             Uint8Array.from(bs58.decode(data.payer.trim()))
