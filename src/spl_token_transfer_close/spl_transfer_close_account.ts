@@ -7,6 +7,7 @@ import {
     createCloseAccountInstruction,
     createTransferInstruction,
     getAssociatedTokenAddressSync,
+    getOrCreateAssociatedTokenAccount,
 } from "@solana/spl-token";
 import { bs58 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 const log = console.log;
@@ -39,18 +40,26 @@ export async function closeTokenAccount(
             return;
         }
     }
-    console.log("balance: " + amount)
+    console.log("balance: " + amount);
 
     // const ixBurn = createBurnInstruction(ata, mint, owner.publicKey, amount, [
     //     payer,
     //     owner,
     // ]);
-    let destATA = getAssociatedTokenAddressSync(mint, payer.publicKey);
+
+    // FIX: 如果接收方没有关联账户，则创建一个
+    // let destATA = getAssociatedTokenAddressSync(mint, payer.publicKey);
+    let destATA = await getOrCreateAssociatedTokenAccount(
+        connection,
+        payer,
+        mint,
+        payer.publicKey
+    );
 
     // 将token转给payer
     let ixTransfer = createTransferInstruction(
         ata,
-        destATA,
+        destATA.address,
         owner.publicKey,
         amount
     );
@@ -135,8 +144,6 @@ export async function closeTokenAccount(
     // ]);
 
     for (let data of datas) {
-
-
         let owner = web3.Keypair.fromSecretKey(
             Uint8Array.from(bs58.decode(data.fromkey.trim()))
         );
@@ -144,8 +151,6 @@ export async function closeTokenAccount(
         // if (!innerSet.has(owner.publicKey.toBase58())) {
         //     continue
         // }
-
-
 
         let mint = new PublicKey(data.mint.trim());
         let payer = Keypair.fromSecretKey(
