@@ -17,7 +17,8 @@ interface CsvRecord {
 
 // Solana RPC连接
 const connection = new Connection(
-    "https://mainnet.helius-rpc.com/?api-key=29acd0dc-e336-4909-873a-0ed1010a9de2",
+    // "https://mainnet.helius-rpc.com/?api-key=29acd0dc-e336-4909-873a-0ed1010a9de2",
+    "https://mainnet.helius-rpc.com/?api-key=c4d86721-7560-45d6-be7e-661ba7485277", // youngqqcn@gmail.com
     "confirmed"
 );
 
