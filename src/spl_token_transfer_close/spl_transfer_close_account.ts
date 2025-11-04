@@ -22,7 +22,8 @@ export async function closeTokenAccount(
     connection: Connection,
     mint: PublicKey,
     owner: Keypair,
-    payer: Keypair
+    payer: Keypair,
+    defaultCULimit: number = 7959 + 100
 ) {
     console.log("=========closeTokenAccount=============");
     console.log("处理地址: ", owner.publicKey.toBase58());
@@ -72,10 +73,11 @@ export async function closeTokenAccount(
 
     // 加速 speedup
     const updateCuIx = web3.ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 200_000, // 1 lamports
+        microLamports: 100_000, // 0.1 lamports
     });
     const updateCULimit = web3.ComputeBudgetProgram.setComputeUnitLimit({
-        units: 15959,
+        // units: 15959,
+        units: defaultCULimit,
     });
     const recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
 
@@ -101,6 +103,7 @@ export async function closeTokenAccount(
     tx.feePayer = payer.publicKey;
     tx.recentBlockhash = recentBlockhash;
     tx.sign(payer, owner);
+    let errorInfo = null;
     const rawTx = tx.serialize();
     const txSignature = await web3
         .sendAndConfirmRawTransaction(connection, Buffer.from(rawTx), {
@@ -113,17 +116,22 @@ export async function closeTokenAccount(
                     commitment: "confirmed",
                 })
                 .catch((createPoolAndBuyTxFail) => {
+                    errorInfo = createPoolAndBuyTxFail;
                     log({ createPoolAndBuyTxFail });
                     return null;
                 });
         });
-    if (!txSignature) log("Tx failed");
+    if (!txSignature) {
+        // log("Tx failed", errorInfo);
+        throw new Error("Tx failed" + errorInfo);
+    }
     log("Transaction successfull\nTx Signature: ", txSignature);
 }
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+        "https://mainnet.helius-rpc.com/?api-key=c4d86721-7560-45d6-be7e-661ba7485277";
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -133,7 +141,11 @@ export async function closeTokenAccount(
         confirmTransactionInitialTimeout: 60000,
     });
 
-    let datas: CsvRecord[] = await parseCsvFile<CsvRecord>("./data.csv");
+    let datas: CsvRecord[] = await parseCsvFile<CsvRecord>(
+        // "./008_140_data.csv"
+        // "./001_1000_data.csv"
+        "./002_to_007_data.csv"
+    );
     console.log("datas长度", datas.length);
 
     // datas = datas.slice(3062);
@@ -143,7 +155,17 @@ export async function closeTokenAccount(
     //     "1hsVxBCf2pvQefLinG87qruZWqaGx9dDnbtpFmv4dXY",
     // ]);
 
+    let count = 0;
+    let failed_address = [];
+
     for (let data of datas) {
+        console.log(
+            "========共",
+            datas.length,
+            "个地址，处理第",
+            count + 1,
+            "个地址========="
+        );
         let owner = web3.Keypair.fromSecretKey(
             Uint8Array.from(bs58.decode(data.fromkey.trim()))
         );
@@ -156,6 +178,36 @@ export async function closeTokenAccount(
         let payer = Keypair.fromSecretKey(
             Uint8Array.from(bs58.decode(data.payer.trim()))
         );
-        await closeTokenAccount(connection, mint, owner, payer);
+
+        // 如果发生异常，重试3次
+        let defaultCULimit = 7959;
+        for (let i = 0; i < 3; i++) {
+            try {
+                await closeTokenAccount(
+                    connection,
+                    mint,
+                    owner,
+                    payer,
+                    defaultCULimit
+                );
+                count++;
+                break;
+            } catch (error: Error | any) {
+                console.log("closeTokenAccount error, 重试第", i, "次", error);
+                if (error.toString().indexOf("exceeded CUs meter") >= 0) {
+                    defaultCULimit += 100;
+                }
+                if (i === 2) {
+                    console.log("最终失败，跳过");
+                    failed_address.push(data);
+                }
+            }
+        }
+    }
+
+    // 打印所有失败的地址
+    console.log("=====所有失败的地址, 共", failed_address.length, "个=======");
+    for (let addr of failed_address) {
+        console.log(addr.fromkey);
     }
 })();
