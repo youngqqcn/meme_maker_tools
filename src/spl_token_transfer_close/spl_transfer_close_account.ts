@@ -130,8 +130,8 @@ export async function closeTokenAccount(
 
 (async () => {
     const RPC_ENDPOINT_MAIN =
-        // "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
-        "https://mainnet.helius-rpc.com/?api-key=c4d86721-7560-45d6-be7e-661ba7485277";
+        "https://mainnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
+    // "https://mainnet.helius-rpc.com/?api-key=c4d86721-7560-45d6-be7e-661ba7485277";
 
     const RPC_ENDPOINT_DEV =
         "https://devnet.helius-rpc.com/?api-key=a72af9a3-d315-4df0-8e00-883ed4cebb61";
@@ -144,7 +144,10 @@ export async function closeTokenAccount(
     let datas: CsvRecord[] = await parseCsvFile<CsvRecord>(
         // "./008_140_data.csv"
         // "./001_1000_data.csv"
-        "./002_to_007_data.csv"
+        // "./002_to_007_data.csv"
+        // "./350_50_10_data.csv"
+        // "./350_50_10_data_WSOL.csv"
+        "./last.csv"
     );
     console.log("datas长度", datas.length);
 
@@ -201,6 +204,8 @@ export async function closeTokenAccount(
                     console.log("最终失败，跳过");
                     failed_address.push(data);
                 }
+            } finally {
+                await sleep(500); // 每次操作后休息0.5秒
             }
         }
     }

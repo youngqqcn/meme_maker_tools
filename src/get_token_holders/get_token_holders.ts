@@ -116,6 +116,7 @@ async function getTokenHolders() {
                 } else {
                     innertTokenSum += v["balance"];
                     innerAddrs.push(v);
+                    // console.log("内部地址:", k, v["balance"]);
                 }
             }
         }
