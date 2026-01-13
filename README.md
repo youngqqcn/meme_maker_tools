@@ -20,7 +20,7 @@
 |13|[Token持仓分析](./src/get_token_holders/) | 100% | TypeScript|
 |14|[Raydium新池子狙击工具](./src/trade_on_raydium/sniper) | 100% | TypeScript|
 |15|[原地换手(刷数据)](./src/turnover/) | 100% | TypeScript|
-
+|16|[回收资金](./src/spl_token_transfer_close/) | 100% | TypeScript|
 
 
 # 运行
@@ -40,4 +40,14 @@
 - `f95cc4fe-fe7c-4de8-abed-eaefe0771ba7` : youngqqcn@qq.com
 - `29acd0dc-e336-4909-873a-0ed1010a9de2` : youngqqcn@163.com
 - `c4d86721-7560-45d6-be7e-661ba7485277` : youngqqcn@gmail.com
-- 
+-
+
+
+# 示例
+CAMI项目从2025年1月，运行到2025年11月撤池子。
+
+![](./cami.png)
+
+
+Koiai
+![](./koiai.png)
