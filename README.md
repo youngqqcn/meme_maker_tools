@@ -36,11 +36,16 @@
 
 
 
-# 示例
+# 实战案例
+
+#### CAMI
 CAMI项目从2025年1月，运行到2025年11月撤池子。
 
+- https://gmgn.ai/sol/token/DWYNRC2FFBRFAuifHYmyDG6427sBqjKS1NBsdnfpLUL9
 ![](./cami.png)
 
 
-Koiai
+#### Koiai
+- https://gmgn.ai/sol/token/84FhSgZexvSf2pjGGRSiAWtvJJHZcS6VVrXhJmqYmidx
+
 ![](./koiai.png)
