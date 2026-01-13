@@ -218,17 +218,18 @@ async function xxx() {
     // let mint = new PublicKey("9FQbXGvfFa5HRZuKhceJD7dGzVJyhqoqqQmJ42RyUcgK");
     let payer = Keypair.fromSecretKey(
         bs58.decode(
-            "DD7evt2hCGZ9kV9do2zhubQkSqTizB2bBuL5YLR3oZJ8nQsUqEJyASjUqnjj2x5RXexP6k3PR8E2UBRovsDVESt"
+            "YOUKEY"
         )
     );
-    let ret = await swap(connection, payer, {
-        poolId: new PublicKey("2yLEsHFPYZFzs2dmRXfFm4ujcLorDdnJSP34K1tQdDJ4"),
-        buyToken: "base", // 买入 Token
-        sellToken: "quote",
-        amountSide: "receive",
-        amount: 10000,
-        slippage: getSlippage(15),
-    });
+    console.log("payer.publicKey: ", payer.publicKey.toBase58());
+    // let ret = await swap(connection, payer, {
+    //     poolId: new PublicKey("2yLEsHFPYZFzs2dmRXfFm4ujcLorDdnJSP34K1tQdDJ4"),
+    //     buyToken: "base", // 买入 Token
+    //     sellToken: "quote",
+    //     amountSide: "receive",
+    //     amount: 10000,
+    //     slippage: getSlippage(15),
+    // });
 
     // 全部卖完
     // let balance = await getTokenBalance(
@@ -247,9 +248,9 @@ async function xxx() {
     //     slippage: getSlippage(15),
     // });
 
-    console.log("ret", ret);
+    // console.log("ret", ret);
 }
 
-// xxx()
-//     .catch((e) => console.log(e))
-//     .then();
+xxx()
+    .catch((e) => console.log(e))
+    .then();
